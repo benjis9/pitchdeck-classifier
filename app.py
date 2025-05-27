@@ -4,8 +4,8 @@ import openai
 import tiktoken
 import math
 
-# Set your OpenAI key here for local dev
-openai.api_key = st.secrets.get("OPENAI_API_KEY", "your-api-key-here")
+# Use the new OpenAI v1.0+ client
+client = openai.OpenAI(api_key=st.secrets.get("OPENAI_API_KEY", "your-api-key-here"))
 
 # Setup Streamlit page
 st.set_page_config(page_title="Pitch Deck Classifier", layout="centered")
@@ -37,7 +37,7 @@ You are a VC analyst. Read the following section from a startup pitch deck and s
 
 {chunk}
 """
-    response = openai.ChatCompletion.create(
+    response = client.chat.completions.create(
         model="gpt-4",
         messages=[
             {"role": "system", "content": "You are a VC investment analyst."},
@@ -45,7 +45,7 @@ You are a VC analyst. Read the following section from a startup pitch deck and s
         ],
         temperature=0.3
     )
-    return response['choices'][0]['message']['content']
+    return response.choices[0].message.content
 
 # Score the full summarized deck
 def score_deck(summary):
@@ -80,7 +80,7 @@ Return output in this format:
 Startup deck summary:
 {summary}
 """
-    response = openai.ChatCompletion.create(
+    response = client.chat.completions.create(
         model="gpt-4",
         messages=[
             {"role": "system", "content": "You are a VC analyst."},
@@ -88,7 +88,7 @@ Startup deck summary:
         ],
         temperature=0.3
     )
-    return response['choices'][0]['message']['content']
+    return response.choices[0].message.content
 
 # Upload and process PDF
 uploaded_file = st.file_uploader("Upload a pitch deck (PDF)", type=["pdf"])
