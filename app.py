@@ -69,7 +69,7 @@ def chunk_text(text, max_tokens=3000, overlap=300):
 # ---------------------------
 # SUMMARIZATION & SCORING
 # ---------------------------
-def summarize_chunk(chunk, retries=3):
+def summarize_chunk(chunk, retries=5):
     prompt = f"""
 You are a VC analyst. Read the following section from a startup pitch deck and summarize key information related to team, traction, and business model:
 
@@ -89,15 +89,14 @@ You are a VC analyst. Read the following section from a startup pitch deck and s
 
         except (RateLimitError, APIError) as e:
             if attempt < retries - 1:
-                wait_time = 2 ** (attempt + 1)
+                wait_time = 5 * (attempt + 1)  # 5s → 10s → ...
                 st.warning(f"⚠️ Rate limit hit or temporary error. Retrying in {wait_time}s...")
                 time.sleep(wait_time)
             else:
-                st.error("❌ OpenAI API rate limit exceeded. Please try again later.")
+                st.error("❌ OpenAI API rate limit exceeded after retries.")
                 raise e
 
-
-def score_deck(summary, retries=3):
+def score_deck(summary, retries=5):
     rubric_prompt = f"""
 You are a VC analyst. Score this startup based on the following rubric:
 
@@ -143,14 +142,12 @@ Startup deck summary:
 
         except (RateLimitError, APIError) as e:
             if attempt < retries - 1:
-                wait_time = 2 ** (attempt + 1)
+                wait_time = 5 * (attempt + 1)
                 st.warning(f"⚠️ Rate limit hit or temporary error. Retrying in {wait_time}s...")
                 time.sleep(wait_time)
             else:
-                st.error("❌ OpenAI API rate limit exceeded. Please try again later.")
+                st.error("❌ OpenAI API rate limit exceeded after retries.")
                 raise e
-
-
 # ---------------------------
 # MAIN APP FLOW
 # ---------------------------
