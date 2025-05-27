@@ -6,8 +6,10 @@ from datetime import datetime
 import json
 import os
 import time
+import base64
+from io import BytesIO
+from PIL import Image
 from openai import RateLimitError, APIError
-
 
 # ---------------------------
 # STREAMLIT PAGE CONFIG
@@ -17,14 +19,14 @@ st.title("📊 Pitch Deck Classifier")
 st.write("Upload a pitch deck PDF and get a VC-style evaluation with scoring and rationale.")
 
 # Setup OpenAI client (v1 API)
-client = openai.OpenAI(api_key=st.secrets.get("OPENAI_API_KEY", "your-api-key-here"))
+client = openai.OpenAI(api_key=os.environ.get("OPENAI_API_KEY", "your-api-key-here"))
 
 # ---------------------------
 # 🔒 SIMPLE LOGIN SYSTEM
 # ---------------------------
 st.sidebar.title("🔒 Login")
 password = st.sidebar.text_input("Enter password", type="password")
-if password != st.secrets.get("APP_PASSWORD", "your-test-password"):
+if password != os.environ.get("APP_PASSWORD", "your-test-password"):
     st.warning("Please enter the correct password to access the app.")
     st.stop()
 
@@ -47,55 +49,57 @@ def record_usage(usage, log_file):
     with open(log_file, "w") as f:
         json.dump(usage, f)
 
-
 # ---------------------------
 # TOKEN & CHUNKING UTILITIES
 # ---------------------------
-def estimate_tokens(text, model="gpt-3.5-turbo"):
+def estimate_tokens(text, model="gpt-4o"):
     encoding = tiktoken.encoding_for_model(model)
     return len(encoding.encode(text))
 
-def chunk_text(text, max_tokens=3000, overlap=300):
-    encoding = tiktoken.encoding_for_model("gpt-3.5-turbo")
-    tokens = encoding.encode(text)
-    chunks = []
-    i = 0
-    while i < len(tokens):
-        chunk = tokens[i:i+max_tokens]
-        chunks.append(encoding.decode(chunk))
-        i += max_tokens - overlap
-    return chunks
+# ---------------------------
+# IMAGE ENCODING
+# ---------------------------
+def encode_image_to_base64(pix):
+    img = Image.frombytes("RGB", [pix.width, pix.height], pix.samples)
+    buffered = BytesIO()
+    img.save(buffered, format="PNG")
+    return base64.b64encode(buffered.getvalue()).decode("utf-8")
 
 # ---------------------------
-# SUMMARIZATION & SCORING
+# SUMMARIZATION WITH IMAGE + TEXT
 # ---------------------------
-def summarize_chunk(chunk, retries=5):
-    prompt = f"""
-You are a VC analyst. Read the following section from a startup pitch deck and summarize key information related to team, traction, and business model:
+def summarize_slide(text, image_base64, retries=5):
+    messages = [
+        {"role": "system", "content": "You are a VC analyst skilled in evaluating startup pitch decks with both text and image inputs."},
+        {
+            "role": "user",
+            "content": [
+                {"type": "text", "text": f"Please analyze this slide from a startup pitch deck. Summarize information related to the team, traction, and business model.\n\n{text}"},
+                {"type": "image_url", "image_url": {"url": f"data:image/png;base64,{image_base64}"}}
+            ]
+        }
+    ]
 
-{chunk}
-"""
     for attempt in range(retries):
         try:
             response = client.chat.completions.create(
-                model="gpt-3.5-turbo",
-                messages=[
-                    {"role": "system", "content": "You are a VC investment analyst."},
-                    {"role": "user", "content": prompt}
-                ],
+                model="gpt-4o",
+                messages=messages,
                 temperature=0.3
             )
             return response.choices[0].message.content
-
         except (RateLimitError, APIError) as e:
             if attempt < retries - 1:
-                wait_time = 5 * (attempt + 1)  # 5s → 10s → ...
+                wait_time = 5 * (attempt + 1)
                 st.warning(f"⚠️ Rate limit hit or temporary error. Retrying in {wait_time}s...")
                 time.sleep(wait_time)
             else:
                 st.error("❌ OpenAI API rate limit exceeded after retries.")
                 raise e
 
+# ---------------------------
+# SCORING
+# ---------------------------
 def score_deck(summary, retries=5):
     rubric_prompt = f"""
 You are a VC analyst. Score this startup based on the following rubric:
@@ -131,7 +135,7 @@ Startup deck summary:
     for attempt in range(retries):
         try:
             response = client.chat.completions.create(
-                model="gpt-3.5-turbo",
+                model="gpt-4o",
                 messages=[
                     {"role": "system", "content": "You are a VC analyst."},
                     {"role": "user", "content": rubric_prompt}
@@ -139,7 +143,6 @@ Startup deck summary:
                 temperature=0.3
             )
             return response.choices[0].message.content
-
         except (RateLimitError, APIError) as e:
             if attempt < retries - 1:
                 wait_time = 5 * (attempt + 1)
@@ -148,6 +151,7 @@ Startup deck summary:
             else:
                 st.error("❌ OpenAI API rate limit exceeded after retries.")
                 raise e
+
 # ---------------------------
 # MAIN APP FLOW
 # ---------------------------
@@ -156,37 +160,27 @@ uploaded_file = st.file_uploader("Upload a pitch deck (PDF)", type=["pdf"])
 if uploaded_file:
     st.success("PDF uploaded. Reading content...")
 
-    # Check usage limit
     count_today, usage, log_file = get_usage_today()
     if count_today >= 5:
         st.error("🚫 Daily usage limit reached for this demo. Please try again tomorrow.")
         st.stop()
 
-    # Extract text from PDF
     doc = fitz.open(stream=uploaded_file.read(), filetype="pdf")
-    text = ""
-    for page in doc:
-        text += page.get_text()
+    page_summaries = []
 
-    token_count = estimate_tokens(text)
-    st.write(f"📏 Estimated token count: **{token_count}**")
+    with st.spinner("Analyzing each slide..."):
+        for i, page in enumerate(doc):
+            text = page.get_text()
+            pix = page.get_pixmap(dpi=150)
+            image_b64 = encode_image_to_base64(pix)
+            summary = summarize_slide(text, image_b64)
+            page_summaries.append(summary)
 
-    if token_count < 6000:
-        st.info("✅ Small file — processing in one go...")
-        with st.spinner("Scoring deck..."):
-            summary = summarize_chunk(text)
-            final_score = score_deck(summary)
-            st.success("Analysis complete!")
-            st.json(final_score)
-    else:
-        st.warning("⚠️ Large file — processing in chunks...")
-        with st.spinner("Summarizing deck in sections..."):
-            chunks = chunk_text(text)
-            summaries = [summarize_chunk(chunk) for chunk in chunks]
-            combined_summary = "\n".join(summaries)
-            final_score = score_deck(combined_summary)
-            st.success("Analysis complete!")
-            st.json(final_score)
+    combined_summary = "\n".join(page_summaries)
 
-    # ✅ Record usage
+    with st.spinner("Scoring full pitch deck..."):
+        final_score = score_deck(combined_summary)
+        st.success("Analysis complete!")
+        st.json(final_score)
+
     record_usage(usage, log_file)
