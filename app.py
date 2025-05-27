@@ -2,26 +2,58 @@ import streamlit as st
 import fitz  # PyMuPDF
 import openai
 import tiktoken
-import math
+from datetime import datetime
+import json
+import os
 
-# Use the new OpenAI v1.0+ client
+# Setup OpenAI client (v1 API)
 client = openai.OpenAI(api_key=st.secrets.get("OPENAI_API_KEY", "your-api-key-here"))
 
-# Setup Streamlit page
+# ---------------------------
+# 🔒 SIMPLE LOGIN SYSTEM
+# ---------------------------
+st.sidebar.title("🔒 Login")
+password = st.sidebar.text_input("Enter password", type="password")
+if password != st.secrets.get("APP_PASSWORD", "your-test-password"):
+    st.warning("Please enter the correct password to access the app.")
+    st.stop()
+
+# ---------------------------
+# 🚫 DAILY USAGE LIMIT
+# ---------------------------
+def get_usage_today():
+    today = datetime.now().strftime("%Y-%m-%d")
+    log_file = "usage_log.json"
+    if os.path.exists(log_file):
+        with open(log_file, "r") as f:
+            usage = json.load(f)
+    else:
+        usage = {}
+    return usage.get(today, 0), usage, log_file
+
+def record_usage(usage, log_file):
+    today = datetime.now().strftime("%Y-%m-%d")
+    usage[today] = usage.get(today, 0) + 1
+    with open(log_file, "w") as f:
+        json.dump(usage, f)
+
+# ---------------------------
+# STREAMLIT PAGE CONFIG
+# ---------------------------
 st.set_page_config(page_title="Pitch Deck Classifier", layout="centered")
 st.title("📊 Pitch Deck Classifier")
 st.write("Upload a pitch deck PDF and get a VC-style evaluation with scoring and rationale.")
 
-# Token encoder
+# ---------------------------
+# TOKEN & CHUNKING UTILITIES
+# ---------------------------
 def estimate_tokens(text, model="gpt-4"):
     encoding = tiktoken.encoding_for_model(model)
     return len(encoding.encode(text))
 
-# Chunking utility
 def chunk_text(text, max_tokens=3000, overlap=300):
     encoding = tiktoken.encoding_for_model("gpt-4")
     tokens = encoding.encode(text)
-    
     chunks = []
     i = 0
     while i < len(tokens):
@@ -30,7 +62,9 @@ def chunk_text(text, max_tokens=3000, overlap=300):
         i += max_tokens - overlap
     return chunks
 
-# Summarize a chunk
+# ---------------------------
+# SUMMARIZATION & SCORING
+# ---------------------------
 def summarize_chunk(chunk):
     prompt = f"""
 You are a VC analyst. Read the following section from a startup pitch deck and summarize key information related to team, traction, and business model:
@@ -47,7 +81,6 @@ You are a VC analyst. Read the following section from a startup pitch deck and s
     )
     return response.choices[0].message.content
 
-# Score the full summarized deck
 def score_deck(summary):
     rubric_prompt = f"""
 You are a VC analyst. Score this startup based on the following rubric:
@@ -90,13 +123,21 @@ Startup deck summary:
     )
     return response.choices[0].message.content
 
-# Upload and process PDF
+# ---------------------------
+# MAIN APP FLOW
+# ---------------------------
 uploaded_file = st.file_uploader("Upload a pitch deck (PDF)", type=["pdf"])
 
 if uploaded_file:
     st.success("PDF uploaded. Reading content...")
 
-    # Extract text
+    # Check usage limit
+    count_today, usage, log_file = get_usage_today()
+    if count_today >= 5:
+        st.error("🚫 Daily usage limit reached for this demo. Please try again tomorrow.")
+        st.stop()
+
+    # Extract text from PDF
     doc = fitz.open(stream=uploaded_file.read(), filetype="pdf")
     text = ""
     for page in doc:
@@ -105,7 +146,6 @@ if uploaded_file:
     token_count = estimate_tokens(text)
     st.write(f"📏 Estimated token count: **{token_count}**")
 
-    # Decide to chunk or not
     if token_count < 6000:
         st.info("✅ Small file — processing in one go...")
         with st.spinner("Scoring deck..."):
@@ -122,3 +162,6 @@ if uploaded_file:
             final_score = score_deck(combined_summary)
             st.success("Analysis complete!")
             st.json(final_score)
+
+    # ✅ Record usage
+    record_usage(usage, log_file)
