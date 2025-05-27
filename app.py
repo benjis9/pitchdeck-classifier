@@ -5,6 +5,9 @@ import tiktoken
 from datetime import datetime
 import json
 import os
+import time
+from openai import RateLimitError, APIError
+
 
 # ---------------------------
 # STREAMLIT PAGE CONFIG
@@ -66,23 +69,35 @@ def chunk_text(text, max_tokens=3000, overlap=300):
 # ---------------------------
 # SUMMARIZATION & SCORING
 # ---------------------------
-def summarize_chunk(chunk):
+def summarize_chunk(chunk, retries=3):
     prompt = f"""
 You are a VC analyst. Read the following section from a startup pitch deck and summarize key information related to team, traction, and business model:
 
 {chunk}
 """
-    response = client.chat.completions.create(
-        model="gpt-4o",
-        messages=[
-            {"role": "system", "content": "You are a VC investment analyst."},
-            {"role": "user", "content": prompt}
-        ],
-        temperature=0.3
-    )
-    return response.choices[0].message.content
+    for attempt in range(retries):
+        try:
+            response = client.chat.completions.create(
+                model="gpt-4o",
+                messages=[
+                    {"role": "system", "content": "You are a VC investment analyst."},
+                    {"role": "user", "content": prompt}
+                ],
+                temperature=0.3
+            )
+            return response.choices[0].message.content
 
-def score_deck(summary):
+        except (RateLimitError, APIError) as e:
+            if attempt < retries - 1:
+                wait_time = 2 ** (attempt + 1)
+                st.warning(f"⚠️ Rate limit hit or temporary error. Retrying in {wait_time}s...")
+                time.sleep(wait_time)
+            else:
+                st.error("❌ OpenAI API rate limit exceeded. Please try again later.")
+                raise e
+
+
+def score_deck(summary, retries=3):
     rubric_prompt = f"""
 You are a VC analyst. Score this startup based on the following rubric:
 
@@ -114,15 +129,27 @@ Return output in this format:
 Startup deck summary:
 {summary}
 """
-    response = client.chat.completions.create(
-        model="gpt-4o",
-        messages=[
-            {"role": "system", "content": "You are a VC analyst."},
-            {"role": "user", "content": rubric_prompt}
-        ],
-        temperature=0.3
-    )
-    return response.choices[0].message.content
+    for attempt in range(retries):
+        try:
+            response = client.chat.completions.create(
+                model="gpt-4o",
+                messages=[
+                    {"role": "system", "content": "You are a VC analyst."},
+                    {"role": "user", "content": rubric_prompt}
+                ],
+                temperature=0.3
+            )
+            return response.choices[0].message.content
+
+        except (RateLimitError, APIError) as e:
+            if attempt < retries - 1:
+                wait_time = 2 ** (attempt + 1)
+                st.warning(f"⚠️ Rate limit hit or temporary error. Retrying in {wait_time}s...")
+                time.sleep(wait_time)
+            else:
+                st.error("❌ OpenAI API rate limit exceeded. Please try again later.")
+                raise e
+
 
 # ---------------------------
 # MAIN APP FLOW
