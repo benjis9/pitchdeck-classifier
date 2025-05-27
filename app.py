@@ -48,12 +48,12 @@ def record_usage(usage, log_file):
 # ---------------------------
 # TOKEN & CHUNKING UTILITIES
 # ---------------------------
-def estimate_tokens(text, model="gpt-4-turbo"):
+def estimate_tokens(text, model="gpt-4o"):
     encoding = tiktoken.encoding_for_model(model)
     return len(encoding.encode(text))
 
 def chunk_text(text, max_tokens=3000, overlap=300):
-    encoding = tiktoken.encoding_for_model("gpt-4-turbo")
+    encoding = tiktoken.encoding_for_model("gpt-4o")
     tokens = encoding.encode(text)
     chunks = []
     i = 0
@@ -73,7 +73,7 @@ You are a VC analyst. Read the following section from a startup pitch deck and s
 {chunk}
 """
     response = client.chat.completions.create(
-        model="gpt-4-turbo",
+        model="gpt-4o",
         messages=[
             {"role": "system", "content": "You are a VC investment analyst."},
             {"role": "user", "content": prompt}
@@ -115,7 +115,7 @@ Startup deck summary:
 {summary}
 """
     response = client.chat.completions.create(
-        model="gpt-4-turbo",
+        model="gpt-4o",
         messages=[
             {"role": "system", "content": "You are a VC analyst."},
             {"role": "user", "content": rubric_prompt}
