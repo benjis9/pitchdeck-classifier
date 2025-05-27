@@ -6,6 +6,13 @@ from datetime import datetime
 import json
 import os
 
+# ---------------------------
+# STREAMLIT PAGE CONFIG
+# ---------------------------
+st.set_page_config(page_title="Pitch Deck Classifier", layout="centered")
+st.title("📊 Pitch Deck Classifier")
+st.write("Upload a pitch deck PDF and get a VC-style evaluation with scoring and rationale.")
+
 # Setup OpenAI client (v1 API)
 client = openai.OpenAI(api_key=st.secrets.get("OPENAI_API_KEY", "your-api-key-here"))
 
@@ -37,12 +44,6 @@ def record_usage(usage, log_file):
     with open(log_file, "w") as f:
         json.dump(usage, f)
 
-# ---------------------------
-# STREAMLIT PAGE CONFIG
-# ---------------------------
-st.set_page_config(page_title="Pitch Deck Classifier", layout="centered")
-st.title("📊 Pitch Deck Classifier")
-st.write("Upload a pitch deck PDF and get a VC-style evaluation with scoring and rationale.")
 
 # ---------------------------
 # TOKEN & CHUNKING UTILITIES
