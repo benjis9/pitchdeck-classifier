@@ -7,9 +7,9 @@ import json
 import os
 import time
 import base64
-from io import BytesIO
-from PIL import Image
 from openai import RateLimitError, APIError
+from PIL import Image
+from io import BytesIO
 
 # ---------------------------
 # STREAMLIT PAGE CONFIG
@@ -19,7 +19,7 @@ st.title("📊 Pitch Deck Classifier")
 st.write("Upload a pitch deck PDF and get a VC-style evaluation with scoring and rationale.")
 
 # Setup OpenAI client (v1 API)
-client = openai.OpenAI(api_key=os.environ.get("OPENAI_API_KEY", "your-api-key-here"))
+client = openai.OpenAI(api_key=os.environ.get("OPENAI_API_KEY"))
 
 # ---------------------------
 # 🔒 SIMPLE LOGIN SYSTEM
@@ -50,36 +50,29 @@ def record_usage(usage, log_file):
         json.dump(usage, f)
 
 # ---------------------------
-# TOKEN & CHUNKING UTILITIES
+# PDF UTILITIES
 # ---------------------------
-def estimate_tokens(text, model="gpt-4o"):
-    encoding = tiktoken.encoding_for_model(model)
-    return len(encoding.encode(text))
-
-# ---------------------------
-# IMAGE ENCODING
-# ---------------------------
-def encode_image_to_base64(pix):
+def get_image_base64(page):
+    pix = page.get_pixmap(dpi=150)
     img = Image.frombytes("RGB", [pix.width, pix.height], pix.samples)
-    buffered = BytesIO()
-    img.save(buffered, format="PNG")
-    return base64.b64encode(buffered.getvalue()).decode("utf-8")
+    buffer = BytesIO()
+    img.save(buffer, format="PNG")
+    return base64.b64encode(buffer.getvalue()).decode("utf-8")
 
 # ---------------------------
-# SUMMARIZATION WITH IMAGE + TEXT
+# SUMMARIZATION & SCORING
 # ---------------------------
-def summarize_slide(text, image_base64, retries=5):
+def summarize_slide(text, image_b64, retries=5):
     messages = [
-        {"role": "system", "content": "You are a VC analyst skilled in evaluating startup pitch decks with both text and image inputs."},
+        {"role": "system", "content": "You are a VC analyst. Analyze the pitch slide (text and image)."},
         {
             "role": "user",
             "content": [
-                {"type": "text", "text": f"Please analyze this slide from a startup pitch deck. Summarize information related to the team, traction, and business model.\n\n{text}"},
-                {"type": "image_url", "image_url": {"url": f"data:image/png;base64,{image_base64}"}}
+                {"type": "text", "text": "Summarize key information related to team, traction, and business model from the slide."},
+                {"type": "image_url", "image_url": {"url": f"data:image/png;base64,{image_b64}"}}
             ]
         }
     ]
-
     for attempt in range(retries):
         try:
             response = client.chat.completions.create(
@@ -97,9 +90,6 @@ def summarize_slide(text, image_base64, retries=5):
                 st.error("❌ OpenAI API rate limit exceeded after retries.")
                 raise e
 
-# ---------------------------
-# SCORING
-# ---------------------------
 def score_deck(summary, retries=5):
     rubric_prompt = f"""
 You are a VC analyst. Score this startup based on the following rubric:
@@ -120,13 +110,13 @@ TRACTION:
 3. Customer retention?
 
 Give a score for each question between 0 and 1.
-Return output in this format:
+Return only valid JSON using this format (without triple backticks):
 {{
-    "team": {{"1": _, "2": _, "3": _}},
-    "business_model": {{"1": _, "2": _, "3": _}},
-    "traction": {{"1": _, "2": _, "3": _}},
-    "total_score": _,
-    "rationale": "Your explanation..."
+  "team": {{"1": _, "2": _, "3": _}},
+  "business_model": {{"1": _, "2": _, "3": _}},
+  "traction": {{"1": _, "2": _, "3": _}},
+  "total_score": _,
+  "rationale": "Your explanation..."
 }}
 
 Startup deck summary:
@@ -160,27 +150,27 @@ uploaded_file = st.file_uploader("Upload a pitch deck (PDF)", type=["pdf"])
 if uploaded_file:
     st.success("PDF uploaded. Reading content...")
 
+    # Check usage limit
     count_today, usage, log_file = get_usage_today()
     if count_today >= 5:
         st.error("🚫 Daily usage limit reached for this demo. Please try again tomorrow.")
         st.stop()
 
+    # Extract text and images from PDF
     doc = fitz.open(stream=uploaded_file.read(), filetype="pdf")
-    page_summaries = []
+    slides = []
+    for page in doc:
+        slide_text = page.get_text()
+        slide_img_b64 = get_image_base64(page)
+        slides.append((slide_text, slide_img_b64))
 
-    with st.spinner("Analyzing each slide..."):
-        for i, page in enumerate(doc):
-            text = page.get_text()
-            pix = page.get_pixmap(dpi=150)
-            image_b64 = encode_image_to_base64(pix)
-            summary = summarize_slide(text, image_b64)
-            page_summaries.append(summary)
-
-    combined_summary = "\n".join(page_summaries)
-
-    with st.spinner("Scoring full pitch deck..."):
+    # Process slides
+    with st.spinner("Summarizing each slide with image + text..."):
+        summaries = [summarize_slide(text, img_b64) for text, img_b64 in slides]
+        combined_summary = "\n".join(summaries)
         final_score = score_deck(combined_summary)
         st.success("Analysis complete!")
         st.json(final_score)
 
+    # ✅ Record usage
     record_usage(usage, log_file)
