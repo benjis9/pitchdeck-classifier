@@ -21,22 +21,34 @@ st.write("Upload a pitch deck PDF and get a VC-style evaluation with scoring and
 # Setup OpenAI client (v1 API)
 client = openai.OpenAI(api_key=st.secrets["OPENAI_API_KEY"])
 
-# 🔒 LOGIN WITH AUTO-HIDE
+# ---------------------------
+# 🔒 SIMPLE LOGIN
+# ---------------------------
 st.sidebar.title("🔒 Login")
 
+# Initialize login state
 if "authenticated" not in st.session_state:
     st.session_state["authenticated"] = False
+    st.session_state["login_failed"] = False
 
+# Show login input only if not logged in
 if not st.session_state["authenticated"]:
     password = st.sidebar.text_input("Enter password", type="password")
-    if password == st.secrets["APP_PASSWORD"]:
-        st.session_state["authenticated"] = True
-        st.experimental_rerun()
-    elif password:
-        st.sidebar.error("Incorrect password")
-else:
-    st.sidebar.empty()  # hides login input
-    st.info("✅ Logged in. You can close the sidebar with the arrow in the top-left.")
+    if password:
+        if password == st.secrets["APP_PASSWORD"]:
+            st.session_state["authenticated"] = True
+        else:
+            st.session_state["login_failed"] = True
+
+    if st.session_state["login_failed"]:
+        st.sidebar.error("❌ Incorrect password")
+
+    st.stop()  # Don't render the app until logged in
+
+# Hide login form and show a subtle message after login
+st.sidebar.empty()
+st.caption("✅ Logged in. You can close the sidebar.")
+
 
 # ---------------------------
 # 🚫 DAILY USAGE LIMIT
