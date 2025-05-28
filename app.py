@@ -96,35 +96,24 @@ if st.session_state["authenticated"]:
                     raise e
 
     def score_deck(summary, retries=5):
-        rubric_prompt = f"""
-        You are a VC analyst. Score this startup based on the following rubric:
+    rubric_prompt = f"""
+    You are a VC analyst. Based on the summary below, return a JSON dictionary with the following exact structure (only use 0, 0.5 or 1 for scores):
 
-        TEAM:
-        1. Relevant experience?
-        2. Worked together before?
-        3. Previous founder?
+    {{
+      "1": {{
+        "Team": {{"score": 0, "rationale": "..."}},
+        "Business Model": {{"score": 0, "rationale": "..."}},
+        "Traction": {{"score": 0, "rationale": "..."}}
+      }},
+      "2": {{ ... }},
+      "3": {{ ... }}
+    }}
 
-        BUSINESS MODEL:
-        1. Scalable?
-        2. Upsell potential?
-        3. Resilient to external shocks?
-
-        TRACTION:
-        1. Initial customers?
-        2. Rapid growth?
-        3. Customer retention?
-
-        Give a score for each question between 0, 0.5, and 1.
-        Return this JSON format:
-        {{
-            "1": {{"Team": {{"score": _, "rationale": "..."}}, "Business Model": {{"score": _, "rationale": "..."}}, "Traction": {{"score": _, "rationale": "..."}}}},
-            "2": {{...}},
-            "3": {{...}}
-        }}
-
-        Startup deck summary:
-        {summary}
-        """
+    IMPORTANT: Only return **valid JSON**. Do not include any text or formatting like ```json.
+    
+    Startup summary:
+    {summary}
+    """
         for attempt in range(retries):
             try:
                 response = client.chat.completions.create(
@@ -135,7 +124,18 @@ if st.session_state["authenticated"]:
                     ],
                     temperature=0.3
                 )
-                return json.loads(response.choices[0].message.content)
+    
+                content = response.choices[0].message.content.strip()
+                # Clean up triple backticks if present
+                if content.startswith("```json"):
+                    content = content.replace("```json", "").replace("```", "").strip()
+                return json.loads(content)
+    
+            except json.JSONDecodeError as je:
+                st.error("❌ Failed to parse JSON from OpenAI response. Showing raw output:")
+                st.text(content)
+                raise je
+    
             except (RateLimitError, APIError) as e:
                 if attempt < retries - 1:
                     wait_time = 5 * (attempt + 1)
