@@ -43,9 +43,9 @@ if not st.session_state["authenticated"]:
     if st.session_state["login_failed"]:
         st.sidebar.error("❌ Incorrect password")
 
-    st.stop()  # Don't render the app until logged in
+    st.stop()  # Prevent access until authenticated
 
-# Hide login form and show a subtle message after login
+# After successful login
 st.sidebar.success("✅ Logged in. You can now close the sidebar.")
 
 
