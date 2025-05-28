@@ -196,7 +196,7 @@ Startup summary:
         st.success("PDF uploaded. Reading content...")
 
         count_today, usage, log_file = get_usage_today()
-        if count_today >= 5:
+        if count_today >= 25:
             st.error("🚫 Daily usage limit reached for this demo. Please try again tomorrow.")
             st.stop()
 
