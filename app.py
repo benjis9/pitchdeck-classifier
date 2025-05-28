@@ -23,12 +23,10 @@ st.write("Upload a pitch deck PDF and get a VC-style evaluation with scoring and
 # ---------------------------
 st.sidebar.title("🔒 Login")
 
-# Initialize login state
 if "authenticated" not in st.session_state:
     st.session_state["authenticated"] = False
     st.session_state["login_failed"] = False
 
-# Show login input only if not logged in
 if not st.session_state["authenticated"]:
     password = st.sidebar.text_input("Enter password", type="password")
     if password:
@@ -41,16 +39,11 @@ if not st.session_state["authenticated"]:
     if st.session_state["login_failed"]:
         st.sidebar.error("❌ Incorrect password")
 
-# ✅ After successful login, render the rest of the app
 if st.session_state["authenticated"]:
     st.sidebar.success("✅ Logged in. You can now close the sidebar.")
 
-    # Setup OpenAI client (v1 API)
     client = openai.OpenAI(api_key=st.secrets["OPENAI_API_KEY"])
 
-    # ---------------------------
-    # 🚫 DAILY USAGE LIMIT
-    # ---------------------------
     def get_usage_today():
         today = datetime.now().strftime("%Y-%m-%d")
         log_file = "usage_log.json"
@@ -60,26 +53,20 @@ if st.session_state["authenticated"]:
         else:
             usage = {}
         return usage.get(today, 0), usage, log_file
-    
+
     def record_usage(usage, log_file):
         today = datetime.now().strftime("%Y-%m-%d")
         usage[today] = usage.get(today, 0) + 1
         with open(log_file, "w") as f:
             json.dump(usage, f)
-    
-    # ---------------------------
-    # PDF UTILITIES
-    # ---------------------------
+
     def get_image_base64(page):
         pix = page.get_pixmap(dpi=150)
         img = Image.frombytes("RGB", [pix.width, pix.height], pix.samples)
         buffer = BytesIO()
         img.save(buffer, format="PNG")
         return base64.b64encode(buffer.getvalue()).decode("utf-8")
-    
-    # ---------------------------
-    # SUMMARIZATION & SCORING
-    # ---------------------------
+
     def summarize_slide(text, image_b64, retries=5):
         messages = [
             {"role": "system", "content": "You are a VC analyst. Analyze the pitch slide (text and image)."},
@@ -107,39 +94,37 @@ if st.session_state["authenticated"]:
                 else:
                     st.error("❌ OpenAI API rate limit exceeded after retries.")
                     raise e
-    
+
     def score_deck(summary, retries=5):
         rubric_prompt = f"""
-    You are a VC analyst. Score this startup based on the following rubric:
-    
-    TEAM:
-    1. Relevant experience?
-    2. Worked together before?
-    3. Previous founder?
-    
-    BUSINESS MODEL:
-    1. Scalable?
-    2. Upsell potential?
-    3. Resilient to external shocks?
-    
-    TRACTION:
-    1. Initial customers?
-    2. Rapid growth?
-    3. Customer retention?
-    
-    Give a score for each question between 0 and 1.
-    Return only valid JSON using this format (without triple backticks):
-    {{
-      "team": {{"1": _, "2": _, "3": _}},
-      "business_model": {{"1": _, "2": _, "3": _}},
-      "traction": {{"1": _, "2": _, "3": _}},
-      "total_score": _,
-      "rationale": "Your explanation..."
-    }}
-    
-    Startup deck summary:
-    {summary}
-    """
+        You are a VC analyst. Score this startup based on the following rubric:
+
+        TEAM:
+        1. Relevant experience?
+        2. Worked together before?
+        3. Previous founder?
+
+        BUSINESS MODEL:
+        1. Scalable?
+        2. Upsell potential?
+        3. Resilient to external shocks?
+
+        TRACTION:
+        1. Initial customers?
+        2. Rapid growth?
+        3. Customer retention?
+
+        Give a score for each question between 0, 0.5, and 1.
+        Return this JSON format:
+        {{
+            "1": {{"Team": {{"score": _, "rationale": "..."}}, "Business Model": {{"score": _, "rationale": "..."}}, "Traction": {{"score": _, "rationale": "..."}}}},
+            "2": {{...}},
+            "3": {{...}}
+        }}
+
+        Startup deck summary:
+        {summary}
+        """
         for attempt in range(retries):
             try:
                 response = client.chat.completions.create(
@@ -150,7 +135,7 @@ if st.session_state["authenticated"]:
                     ],
                     temperature=0.3
                 )
-                return response.choices[0].message.content
+                return json.loads(response.choices[0].message.content)
             except (RateLimitError, APIError) as e:
                 if attempt < retries - 1:
                     wait_time = 5 * (attempt + 1)
@@ -159,36 +144,71 @@ if st.session_state["authenticated"]:
                 else:
                     st.error("❌ OpenAI API rate limit exceeded after retries.")
                     raise e
-    
-    # ---------------------------
-    # MAIN APP FLOW
-    # ---------------------------
+
+    def render_html_table(data):
+        html = """
+        <style>
+        table { width: 100%; border-collapse: collapse; margin-top: 20px; }
+        th, td { border: 1px solid #ccc; padding: 8px; text-align: center; }
+        th { background-color: #f8f8f8; }
+        td.score-1 { background-color: #d4edda; } /* green */
+        td.score-0\.5 { background-color: #fff3cd; } /* yellow */
+        td.score-0 { background-color: #f8d7da; } /* red */
+        </style>
+        <table>
+            <tr>
+                <th rowspan="2">#</th>
+                <th colspan="2">Team</th>
+                <th colspan="2">Business Model</th>
+                <th colspan="2">Traction</th>
+            </tr>
+            <tr>
+                <th>Score</th><th>Rationale</th>
+                <th>Score</th><th>Rationale</th>
+                <th>Score</th><th>Rationale</th>
+            </tr>
+        """
+        for i in range(1, 4):
+            row = data[str(i)]
+            def score_class(score):
+                return f"score-{str(score).replace('.', '_')}"
+
+            html += f"""
+            <tr>
+                <td>{i}</td>
+                <td class='{score_class(row['Team']['score'])}'>{row['Team']['score']}</td>
+                <td>{row['Team']['rationale']}</td>
+                <td class='{score_class(row['Business Model']['score'])}'>{row['Business Model']['score']}</td>
+                <td>{row['Business Model']['rationale']}</td>
+                <td class='{score_class(row['Traction']['score'])}'>{row['Traction']['score']}</td>
+                <td>{row['Traction']['rationale']}</td>
+            </tr>
+            """
+        html += "</table>"
+        st.markdown(html, unsafe_allow_html=True)
+
     uploaded_file = st.file_uploader("Upload a pitch deck (PDF)", type=["pdf"])
-    
+
     if uploaded_file:
         st.success("PDF uploaded. Reading content...")
-    
-        # Check usage limit
+
         count_today, usage, log_file = get_usage_today()
         if count_today >= 5:
             st.error("🚫 Daily usage limit reached for this demo. Please try again tomorrow.")
             st.stop()
-    
-        # Extract text and images from PDF
+
         doc = fitz.open(stream=uploaded_file.read(), filetype="pdf")
         slides = []
         for page in doc:
             slide_text = page.get_text()
             slide_img_b64 = get_image_base64(page)
             slides.append((slide_text, slide_img_b64))
-    
-        # Process slides
+
         with st.spinner("Summarizing each slide with image + text..."):
             summaries = [summarize_slide(text, img_b64) for text, img_b64 in slides]
             combined_summary = "\n".join(summaries)
-            final_score = score_deck(combined_summary)
+            score_data = score_deck(combined_summary)
             st.success("Analysis complete!")
-            st.json(final_score)
-    
-        # ✅ Record usage
+            render_html_table(score_data)
+
         record_usage(usage, log_file)
