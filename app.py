@@ -21,14 +21,22 @@ st.write("Upload a pitch deck PDF and get a VC-style evaluation with scoring and
 # Setup OpenAI client (v1 API)
 client = openai.OpenAI(api_key=st.secrets["OPENAI_API_KEY"])
 
-# ---------------------------
-# 🔒 SIMPLE LOGIN SYSTEM
-# ---------------------------
+# 🔒 LOGIN WITH AUTO-HIDE
 st.sidebar.title("🔒 Login")
-password = st.sidebar.text_input("Enter password", type="password")
-if password != st.secrets["APP_PASSWORD"]:
-    st.warning("Please enter the correct password to access the app.")
-    st.stop()
+
+if "authenticated" not in st.session_state:
+    st.session_state["authenticated"] = False
+
+if not st.session_state["authenticated"]:
+    password = st.sidebar.text_input("Enter password", type="password")
+    if password == st.secrets["APP_PASSWORD"]:
+        st.session_state["authenticated"] = True
+        st.experimental_rerun()
+    elif password:
+        st.sidebar.error("Incorrect password")
+else:
+    st.sidebar.empty()  # hides login input
+    st.info("✅ Logged in. You can close the sidebar with the arrow in the top-left.")
 
 # ---------------------------
 # 🚫 DAILY USAGE LIMIT
