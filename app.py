@@ -40,8 +40,6 @@ if not st.session_state["authenticated"]:
 
     if st.session_state["login_failed"]:
         st.sidebar.error("❌ Incorrect password")
-    else:
-        st.sidebar.info("🔐 Please enter the password to continue.")
 
 # ✅ After successful login, render the rest of the app
 if st.session_state["authenticated"]:
