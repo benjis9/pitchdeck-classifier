@@ -117,7 +117,7 @@ You are a VC analyst. Based on the summary below, return a JSON dictionary with 
   }}
 }}
 
-IMPORTANT: Only return valid JSON. Do not include any text or formatting like ```json.
+IMPORTANT: Return ONLY valid JSON. No markdown, no extra text, no formatting like ```json.
 
 Startup summary:
 {summary}
@@ -138,7 +138,6 @@ Startup summary:
                 return json.loads(content)
             except json.JSONDecodeError as je:
                 st.error("❌ Failed to parse JSON from OpenAI response. Showing raw output:")
-                st.text(content)
                 raise je
             except (RateLimitError, APIError) as e:
                 if attempt < retries - 1:
