@@ -46,8 +46,7 @@ if not st.session_state["authenticated"]:
     st.stop()  # Don't render the app until logged in
 
 # Hide login form and show a subtle message after login
-st.sidebar.empty()
-st.caption("✅ Logged in. You can close the sidebar.")
+st.sidebar.success("✅ Logged in. You can now close the sidebar.")
 
 
 # ---------------------------
