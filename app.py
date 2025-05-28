@@ -1,4 +1,5 @@
 import streamlit as st
+import streamlit.components.v1 as components
 import fitz  # PyMuPDF
 import openai
 import tiktoken
@@ -188,7 +189,7 @@ Startup summary:
             </tr>
             """
         html += "</table>"
-        st.markdown(html, unsafe_allow_html=True)
+        components.html(html, height=600)
 
     uploaded_file = st.file_uploader("Upload a pitch deck (PDF)", type=["pdf"])
 
