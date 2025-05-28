@@ -19,14 +19,14 @@ st.title("📊 Pitch Deck Classifier")
 st.write("Upload a pitch deck PDF and get a VC-style evaluation with scoring and rationale.")
 
 # Setup OpenAI client (v1 API)
-client = openai.OpenAI(api_key=os.environ.get("OPENAI_API_KEY"))
+client = openai.OpenAI(api_key=st.secrets["OPENAI_API_KEY"])
 
 # ---------------------------
 # 🔒 SIMPLE LOGIN SYSTEM
 # ---------------------------
 st.sidebar.title("🔒 Login")
 password = st.sidebar.text_input("Enter password", type="password")
-if password != os.environ.get("APP_PASSWORD", "your-test-password"):
+if password != st.secrets["APP_PASSWORD"]:
     st.warning("Please enter the correct password to access the app.")
     st.stop()
 
