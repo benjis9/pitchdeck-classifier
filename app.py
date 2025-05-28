@@ -149,70 +149,46 @@ Startup summary:
                     raise e
 
     def render_html_table(data):
-    # HTML table structure with placeholders
-    html = """
-    <html>
-    <style>
+        html = """
+        <style>
         table { width: 100%; border-collapse: collapse; margin-top: 20px; }
         th, td { border: 1px solid #ccc; padding: 8px; text-align: center; }
         th { background-color: #f8f8f8; }
         td.score-1 { background-color: #d4edda; }
         td.score-0_5 { background-color: #fff3cd; }
         td.score-0 { background-color: #f8d7da; }
-    </style>
-    <table>
-        <tr>
-            <th rowspan="2">#</th>
-            <th colspan="2">Team</th>
-            <th colspan="2">Business Model</th>
-            <th colspan="2">Traction</th>
-        </tr>
-        <tr>
-            <th>Score</th><th>Rationale</th>
-            <th>Score</th><th>Rationale</th>
-            <th>Score</th><th>Rationale</th>
-        </tr>
-        <tr>
-            <td>1</td>
-            <td></td><td></td>
-            <td></td><td></td>
-            <td></td><td></td>
-        </tr>
-        <tr>
-            <td>2</td>
-            <td></td><td></td>
-            <td></td><td></td>
-            <td></td><td></td>
-        </tr>
-        <tr>
-            <td>3</td>
-            <td></td><td></td>
-            <td></td><td></td>
-            <td></td><td></td>
-        </tr>
-    </table>
-    </html>
-    """
+        </style>
+        <table>
+            <tr>
+                <th rowspan="2">#</th>
+                <th colspan="2">Team</th>
+                <th colspan="2">Business Model</th>
+                <th colspan="2">Traction</th>
+            </tr>
+            <tr>
+                <th>Score</th><th>Rationale</th>
+                <th>Score</th><th>Rationale</th>
+                <th>Score</th><th>Rationale</th>
+            </tr>
+        """
+        for i in range(1, 4):
+            row = data[str(i)]
+            def score_class(score):
+                return f"score-{str(score).replace('.', '_')}"
 
-    # Loop through the data to fill in the table rows dynamically
-    for i in range(1, 4):  # Assuming you have 3 rows to populate
-        row = data[str(i)]
-        
-        def score_class(score):
-            return f"score-{str(score).replace('.', '_')}"  # Generate class based on score value
-
-        # Populate the table rows with actual data
-        html = html.replace(f"<td></td><td></td><td></td><td></td><td></td><td></td>", f"""
-        <td>{i}</td>
-        <td class='{score_class(row['Team']['score'])}'>{row['Team']['score']}</td>
-        <td>{row['Team']['rationale']}</td>
-        <td class='{score_class(row['Business Model']['score'])}'>{row['Business Model']['score']}</td>
-        <td>{row['Business Model']['rationale']}</td>
-        <td class='{score_class(row['Traction']['score'])}'>{row['Traction']['score']}</td>
-        <td>{row['Traction']['rationale']}</td>
-        """, 1)  # Only replace the first occurrence of the placeholder for each row.
-
-    st.markdown(html, unsafe_allow_html=True)
+            html += f"""
+            <tr>
+                <td>{i}</td>
+                <td class='{score_class(row['Team']['score'])}'>{row['Team']['score']}</td>
+                <td>{row['Team']['rationale']}</td>
+                <td class='{score_class(row['Business Model']['score'])}'>{row['Business Model']['score']}</td>
+                <td>{row['Business Model']['rationale']}</td>
+                <td class='{score_class(row['Traction']['score'])}'>{row['Traction']['score']}</td>
+                <td>{row['Traction']['rationale']}</td>
+            </tr>
+            """
+        html += "</table>"
+        st.markdown(html, unsafe_allow_html=True)
 
     uploaded_file = st.file_uploader("Upload a pitch deck (PDF)", type=["pdf"])
 
