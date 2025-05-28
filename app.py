@@ -97,23 +97,31 @@ if st.session_state["authenticated"]:
 
     def score_deck(summary, retries=5):
         rubric_prompt = f"""
-    You are a VC analyst. Based on the summary below, return a JSON dictionary with the following exact structure (only use 0, 0.5 or 1 for scores):
-    
-    {{
-      "1": {{
-        "Team": {{"score": 0, "rationale": "..."}},
-        "Business Model": {{"score": 0, "rationale": "..."}},
-        "Traction": {{"score": 0, "rationale": "..."}}
-      }},
-      "2": {{ ... }},
-      "3": {{ ... }}
-    }}
-    
-    IMPORTANT: Only return **valid JSON**. Do not include any text or formatting like ```json.
-    
-    Startup summary:
-    {summary}
-    """
+You are a VC analyst. Based on the summary below, return a JSON dictionary with the following exact structure (only use 0, 0.5 or 1 for scores):
+
+{{
+  "1": {{
+    "Team": {{"score": 0, "rationale": "..."}},
+    "Business Model": {{"score": 0, "rationale": "..."}},
+    "Traction": {{"score": 0, "rationale": "..."}}
+  }},
+  "2": {{
+    "Team": {{"score": 0, "rationale": "..."}},
+    "Business Model": {{"score": 0, "rationale": "..."}},
+    "Traction": {{"score": 0, "rationale": "..."}}
+  }},
+  "3": {{
+    "Team": {{"score": 0, "rationale": "..."}},
+    "Business Model": {{"score": 0, "rationale": "..."}},
+    "Traction": {{"score": 0, "rationale": "..."}}
+  }}
+}}
+
+IMPORTANT: Only return valid JSON. Do not include any text or formatting like ```json.
+
+Startup summary:
+{summary}
+"""
         for attempt in range(retries):
             try:
                 response = client.chat.completions.create(
@@ -124,18 +132,14 @@ if st.session_state["authenticated"]:
                     ],
                     temperature=0.3
                 )
-    
                 content = response.choices[0].message.content.strip()
-                # Clean up triple backticks if present
                 if content.startswith("```json"):
                     content = content.replace("```json", "").replace("```", "").strip()
                 return json.loads(content)
-    
             except json.JSONDecodeError as je:
                 st.error("❌ Failed to parse JSON from OpenAI response. Showing raw output:")
                 st.text(content)
                 raise je
-    
             except (RateLimitError, APIError) as e:
                 if attempt < retries - 1:
                     wait_time = 5 * (attempt + 1)
@@ -151,9 +155,9 @@ if st.session_state["authenticated"]:
         table { width: 100%; border-collapse: collapse; margin-top: 20px; }
         th, td { border: 1px solid #ccc; padding: 8px; text-align: center; }
         th { background-color: #f8f8f8; }
-        td.score-1 { background-color: #d4edda; } /* green */
-        td.score-0\.5 { background-color: #fff3cd; } /* yellow */
-        td.score-0 { background-color: #f8d7da; } /* red */
+        td.score-1 { background-color: #d4edda; }
+        td.score-0_5 { background-color: #fff3cd; }
+        td.score-0 { background-color: #f8d7da; }
         </style>
         <table>
             <tr>
