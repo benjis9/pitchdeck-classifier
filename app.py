@@ -96,54 +96,54 @@ if st.session_state["authenticated"]:
                     raise e
 
     def score_deck(summary, retries=5):
-    rubric_prompt = f"""
-    You are a VC analyst. Based on the summary below, return a JSON dictionary with the following exact structure (only use 0, 0.5 or 1 for scores):
-
-    {{
-      "1": {{
-        "Team": {{"score": 0, "rationale": "..."}},
-        "Business Model": {{"score": 0, "rationale": "..."}},
-        "Traction": {{"score": 0, "rationale": "..."}}
-      }},
-      "2": {{ ... }},
-      "3": {{ ... }}
-    }}
-
-    IMPORTANT: Only return **valid JSON**. Do not include any text or formatting like ```json.
+        rubric_prompt = f"""
+        You are a VC analyst. Based on the summary below, return a JSON dictionary with the following exact structure (only use 0, 0.5 or 1 for scores):
     
-    Startup summary:
-    {summary}
-    """
-        for attempt in range(retries):
-            try:
-                response = client.chat.completions.create(
-                    model="gpt-4o",
-                    messages=[
-                        {"role": "system", "content": "You are a VC analyst."},
-                        {"role": "user", "content": rubric_prompt}
-                    ],
-                    temperature=0.3
-                )
+        {{
+          "1": {{
+            "Team": {{"score": 0, "rationale": "..."}},
+            "Business Model": {{"score": 0, "rationale": "..."}},
+            "Traction": {{"score": 0, "rationale": "..."}}
+          }},
+          "2": {{ ... }},
+          "3": {{ ... }}
+        }}
     
-                content = response.choices[0].message.content.strip()
-                # Clean up triple backticks if present
-                if content.startswith("```json"):
-                    content = content.replace("```json", "").replace("```", "").strip()
-                return json.loads(content)
-    
-            except json.JSONDecodeError as je:
-                st.error("❌ Failed to parse JSON from OpenAI response. Showing raw output:")
-                st.text(content)
-                raise je
-    
-            except (RateLimitError, APIError) as e:
-                if attempt < retries - 1:
-                    wait_time = 5 * (attempt + 1)
-                    st.warning(f"⚠️ Rate limit hit or temporary error. Retrying in {wait_time}s...")
-                    time.sleep(wait_time)
-                else:
-                    st.error("❌ OpenAI API rate limit exceeded after retries.")
-                    raise e
+        IMPORTANT: Only return **valid JSON**. Do not include any text or formatting like ```json.
+        
+        Startup summary:
+        {summary}
+        """
+            for attempt in range(retries):
+                try:
+                    response = client.chat.completions.create(
+                        model="gpt-4o",
+                        messages=[
+                            {"role": "system", "content": "You are a VC analyst."},
+                            {"role": "user", "content": rubric_prompt}
+                        ],
+                        temperature=0.3
+                    )
+        
+                    content = response.choices[0].message.content.strip()
+                    # Clean up triple backticks if present
+                    if content.startswith("```json"):
+                        content = content.replace("```json", "").replace("```", "").strip()
+                    return json.loads(content)
+        
+                except json.JSONDecodeError as je:
+                    st.error("❌ Failed to parse JSON from OpenAI response. Showing raw output:")
+                    st.text(content)
+                    raise je
+        
+                except (RateLimitError, APIError) as e:
+                    if attempt < retries - 1:
+                        wait_time = 5 * (attempt + 1)
+                        st.warning(f"⚠️ Rate limit hit or temporary error. Retrying in {wait_time}s...")
+                        time.sleep(wait_time)
+                    else:
+                        st.error("❌ OpenAI API rate limit exceeded after retries.")
+                        raise e
 
     def render_html_table(data):
         html = """
