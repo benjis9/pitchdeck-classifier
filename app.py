@@ -281,35 +281,50 @@ if st.session_state["authenticated"]:
                     raise e
 
     def render_html_table(data):
-        theme = "light" if st.get_option("theme.base") == "light" else "dark"
         
-        html = """
-        <style>
-        /* Default light mode styles */
-        table {width: 100%; border-collapse: collapse; margin-top: 20px;}
-        th, td {border: 1px solid #ccc;  padding: 8px;  text-align: center;}
-        th {background-color: {'#f8f8f8' if theme == 'light' else '#2c2f36'};
-        color: {'#000' if theme == 'light' else '#fff'};}
-        td {background-color: {'#fff' if theme == 'light' else '#444444'};
-        color: {'#000' if theme == 'light' else '#fff'};}
-        td.score-1 {background-color: {'#d4edda' if theme == 'light' else '#1e5f24'};}
-        td.score-0_5 {background-color: {'#fff3cd' if theme == 'light' else '#c2a400'};}
-        td.score-0 {background-color: {'#f8d7da' if theme == 'light' else '#7e3e3e'};}
-    
-        </style>
-        <table>
-            <tr>
-                <th rowspan="2">#</th>
-                <th colspan="2">Team</th>
-                <th colspan="2">Business Model</th>
-                <th colspan="2">Traction</th>
-            </tr>
-            <tr>
-                <th>Score</th><th>Rationale</th>
-                <th>Score</th><th>Rationale</th>
-                <th>Score</th><th>Rationale</th>
-            </tr>
-        """
+    html = """
+    <style>
+    table {
+        width: 100%; 
+        border-collapse: collapse; 
+        margin-top: 20px;
+        background-color: #808080; 
+    }
+    th, td {
+        border: 1px solid #ccc; 
+        padding: 8px; 
+        text-align: center;
+        color: #000; 
+    }
+    th {
+        background-color: #b0b0b0;
+    }
+    td {
+        background-color: #808080;
+    }
+    td.score-1 {
+        background-color: #98fb98; /* Light green for score 1 */
+    }
+    td.score-0_5 {
+        background-color: #ffffe0; /* Light yellow for score 0.5 */
+    }
+    td.score-0 {
+        background-color: #f8d7da; /* Light red for score 0 */
+    }
+    </style>
+    <table>
+        <tr>
+            <th rowspan="2">#</th>
+            <th colspan="2">Team</th>
+            <th colspan="2">Business Model</th>
+            <th colspan="2">Traction</th>
+        </tr>
+        <tr>
+            <th>Score</th><th>Rationale</th>
+            <th>Score</th><th>Rationale</th>
+            <th>Score</th><th>Rationale</th>
+        </tr>
+    """
         for i in range(1, 5):
             row = data[str(i)]
             def score_class(score):
