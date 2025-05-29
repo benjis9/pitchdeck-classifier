@@ -69,94 +69,92 @@ if st.session_state["authenticated"]:
 
     def summarize_slide(text, image_b64, previous_summary="", retries=5):
         messages = [
-        {"role": "system", "content": "You are a VC analyst. Analyze the pitch slide (text and image)."},
-        {"role": "user", "content": """
-            Summarize the key information related to Team, Business Model, and Traction from the slide. 
-            Consider the following questions for each slide, and use the examples below to guide your assessment:
+            {"role": "system", "content": "You are a VC analyst. Analyze the pitch slide (text and image)."},
+            {"role": "user", "content": """
+                Summarize the key information related to Team, Business Model, and Traction from the slide. 
+                Consider the following questions for each slide, and use the examples below to guide your assessment:
 
-            **Team Evaluation:**
-            1. **Does the founding team appear to be complete?** 
-                - Look for whether the team is a single founder or a group. If the team consists of only one founder, it may be seen as a **red flag** unless they have strong experience or advisors. Teams with multiple founders or a well-rounded advisory board are often seen as more robust. 
-                - Example: "The team lacks co-founders, which may hinder collaboration and strategic decision-making."
+                **Team Evaluation:**
+                1. **Does the founding team appear to be complete?** 
+                    - Look for whether the team is a single founder or a group. If the team consists of only one founder, it may be seen as a **red flag** unless they have strong experience or advisors. Teams with multiple founders or a well-rounded advisory board are often seen as more robust. 
+                    - Example: "The team lacks co-founders, which may hinder collaboration and strategic decision-making."
 
-            2. **Does the team have the strength and qualifications to compete in this particular industry or market?**
-                - Evaluate whether the team’s **background and skills** align with the industry. A strong team should have relevant experience and expertise.
-                - Example: "The founder has some experience in the tech space but lacks expertise in the fashion industry."
+                2. **Does the team have the strength and qualifications to compete in this particular industry or market?**
+                    - Evaluate whether the team’s **background and skills** align with the industry. A strong team should have relevant experience and expertise.
+                    - Example: "The founder has some experience in the tech space but lacks expertise in the fashion industry."
 
-            3. **Does the founding team have relevant industry experience?**
-                - The more **direct experience** the team has in the industry, the higher the evaluation. If their experience is more **general** or from a **different industry**, their chances of success might be lower.
-                - Example: "The team has industry-relevant experience and the founder has built a successful startup before."
+                3. **Does the founding team have relevant industry experience?**
+                    - The more **direct experience** the team has in the industry, the higher the evaluation. If their experience is more **general** or from a **different industry**, their chances of success might be lower.
+                    - Example: "The team has industry-relevant experience and the founder has built a successful startup before."
 
-            4. **Have the founders previously worked together?**
-                - Teams that have worked together in the past tend to perform better, especially if they’ve succeeded together before. Lack of prior collaboration might be a **concern**.
-                - Example: "The founder is working solo, which could be a **challenge** in building a strong, collaborative team."
+                4. **Have the founders previously worked together?**
+                    - Teams that have worked together in the past tend to perform better, especially if they’ve succeeded together before. Lack of prior collaboration might be a **concern**.
+                    - Example: "The founder is working solo, which could be a **challenge** in building a strong, collaborative team."
 
-            **Business Model Evaluation:**
-            1. **Is the business model scalable?**
-                - Evaluate if the business can grow quickly without **substantial increases in costs**. Scalable models like **SaaS** or **digital-first businesses** tend to score higher, while **hardware or capital-intensive models** score lower.
-                - Example: "The business model is a digital marketplace, which is scalable."
+                **Business Model Evaluation:**
+                1. **Is the business model scalable?**
+                    - Evaluate if the business can grow quickly without **substantial increases in costs**. Scalable models like **SaaS** or **digital-first businesses** tend to score higher, while **hardware or capital-intensive models** score lower.
+                    - Example: "The business model is a digital marketplace, which is scalable."
 
-            2. **Does the business have the potential to add new product lines, services, or upsell to existing customers?**
-                - A **scalable business model** that allows for product/service **expansion** and **upselling** is more likely to succeed. Look for opportunities for **growth** beyond the initial offering.
-                - Example: "The business has the potential to diversify its product line and cross-sell additional services."
+                2. **Does the business have the potential to add new product lines, services, or upsell to existing customers?**
+                    - A **scalable business model** that allows for product/service **expansion** and **upselling** is more likely to succeed. Look for opportunities for **growth** beyond the initial offering.
+                    - Example: "The business has the potential to diversify its product line and cross-sell additional services."
 
-            3. **Is the business model resilient to external shocks?**
-                - Consider whether the business is **immune** to risks like **regulatory changes** or **geopolitical factors**. Resilient business models like **software-only** businesses or those not reliant on global supply chains are less vulnerable.
-                - Example: "The business model is highly vulnerable to changes in international shipping regulations."
+                3. **Is the business model resilient to external shocks?**
+                    - Consider whether the business is **immune** to risks like **regulatory changes** or **geopolitical factors**. Resilient business models like **software-only** businesses or those not reliant on global supply chains are less vulnerable.
+                    - Example: "The business model is highly vulnerable to changes in international shipping regulations."
 
-            4. **Does the business create a new market or unlock a 'shadow market'?**
-                - If the business is **innovative** and disrupts an existing market or creates a **new category**, it’s more likely to succeed. If it’s entering an already saturated market, it may face **more competition**.
-                - Example: "The business targets a niche market in sustainable fashion, which is currently underserved."
+                4. **Does the business create a new market or unlock a 'shadow market'?**
+                    - If the business is **innovative** and disrupts an existing market or creates a **new category**, it’s more likely to succeed. If it’s entering an already saturated market, it may face **more competition**.
+                    - Example: "The business targets a niche market in sustainable fashion, which is currently underserved."
 
-            **Traction Evaluation:**
-            1. **Does the business have initial customers or users?**
-                - Businesses with **early customers** are generally more likely to succeed. Look for **proof of market fit** (e.g., paying customers, partnerships).
-                - Example: "The business has initial customers, and it’s clear that there is demand for the product."
+                **Traction Evaluation:**
+                1. **Does the business have initial customers or users?**
+                    - Businesses with **early customers** are generally more likely to succeed. Look for **proof of market fit** (e.g., paying customers, partnerships).
+                    - Example: "The business has initial customers, and it’s clear that there is demand for the product."
 
-            2. **Is the business demonstrating rapid growth?**
-                - Rapid growth is a strong indicator that the business is **scaling successfully**. Look for metrics like **user growth**, **revenue growth**, and **expansion into new markets**.
-                - Example: "The company is growing steadily, but the growth rate is not impressive yet."
+                2. **Is the business demonstrating rapid growth?**
+                    - Rapid growth is a strong indicator that the business is **scaling successfully**. Look for metrics like **user growth**, **revenue growth**, and **expansion into new markets**.
+                    - Example: "The company is growing steadily, but the growth rate is not impressive yet."
 
-            3. **Is there an indication of good customer retention?**
-                - High retention rates or repeat customers indicate that the product or service is **meeting customer needs**. If retention is low, the business might face **sustainability issues**.
-                - Example: "Customer retention rates are low, which could indicate dissatisfaction with the product."
+                3. **Is there an indication of good customer retention?**
+                    - High retention rates or repeat customers indicate that the product or service is **meeting customer needs**. If retention is low, the business might face **sustainability issues**.
+                    - Example: "Customer retention rates are low, which could indicate dissatisfaction with the product."
 
-            4. **What metrics or KPIs can demonstrate the business’s growth trajectory?**
-                - Look for **growth metrics** such as **revenue growth**, **user acquisition rates**, or **increased market share**.
-                - Example: "The business has shown strong growth in its customer base, increasing GMV by 30% month-over-month."
-
-        """}
-    ]
-
-    if previous_summary:
-        messages.append({"role": "assistant", "content": previous_summary})
-
-    # Add text and image for current slide
-    messages.append({
-        "role": "user",
-        "content": [
-            {"type": "text", "text": text},
-            {"type": "image_url", "image_url": {"url": f"data:image/png;base64,{image_b64}"}}
+                4. **What metrics or KPIs can demonstrate the business’s growth trajectory?**
+                    - Look for **growth metrics** such as **revenue growth**, **user acquisition rates**, or **increased market share**.
+                    - Example: "The business has shown strong growth in its customer base, increasing GMV by 30% month-over-month."
+            """}
         ]
-    })
 
-    for attempt in range(retries):
-        try:
-            response = client.chat.completions.create(
-                model="gpt-4o",
-                messages=messages,
-                temperature=0.3
-            )
-            return response.choices[0].message.content
-        except (RateLimitError, APIError) as e:
-            if attempt < retries - 1:
-                wait_time = 5 * (attempt + 1)
-                st.warning(f"⚠️ Rate limit hit or temporary error. Retrying in {wait_time}s...")
-                time.sleep(wait_time)
-            else:
-                st.error("❌ OpenAI API rate limit exceeded after retries.")
-                raise e
+        if previous_summary:
+            messages.append({"role": "assistant", "content": previous_summary})
 
+        # Add text and image for current slide
+        messages.append({
+            "role": "user",
+            "content": [
+                {"type": "text", "text": text},
+                {"type": "image_url", "image_url": {"url": f"data:image/png;base64,{image_b64}"}}
+            ]
+        })
+
+        for attempt in range(retries):
+            try:
+                response = client.chat.completions.create(
+                    model="gpt-4o",
+                    messages=messages,
+                    temperature=0.3
+                )
+                return response.choices[0].message.content
+            except (RateLimitError, APIError) as e:
+                if attempt < retries - 1:
+                    wait_time = 5 * (attempt + 1)
+                    st.warning(f"⚠️ Rate limit hit or temporary error. Retrying in {wait_time}s...")
+                    time.sleep(wait_time)
+                else:
+                    st.error("❌ OpenAI API rate limit exceeded after retries.")
+                    raise e
 
     def score_deck(summary, retries=5):
         rubric_prompt = f"""
@@ -255,6 +253,7 @@ if st.session_state["authenticated"]:
         Startup summary:
         {summary}
         """
+
         for attempt in range(retries):
             try:
                 response = client.chat.completions.create(
@@ -358,7 +357,6 @@ if st.session_state["authenticated"]:
             combined_summary = "\n".join(summaries)
             score_data = score_deck(combined_summary)
             st.success("Analysis complete!")
-            st.text("Is this even working?")
             render_html_table(score_data)
 
         record_usage(usage, log_file)
