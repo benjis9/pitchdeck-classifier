@@ -68,7 +68,7 @@ if st.session_state["authenticated"]:
         return base64.b64encode(buffer.getvalue()).decode("utf-8")
 
     def summarize_slide(text, image_b64, previous_summary="", retries=5):
-    messages = [
+        messages = [
         {"role": "system", "content": "You are a VC analyst. Analyze the pitch slide (text and image)."},
         {"role": "user", "content": """
             Summarize the key information related to Team, Business Model, and Traction from the slide. 
