@@ -281,25 +281,21 @@ if st.session_state["authenticated"]:
                     raise e
 
     def render_html_table(data):
+        theme = "light" if st.get_option("theme.base") == "light" else "dark"
+        
         html = """
         <style>
         /* Default light mode styles */
         table {width: 100%; border-collapse: collapse; margin-top: 20px;}
         th, td {border: 1px solid #ccc;  padding: 8px;  text-align: center;}
-        th {background-color: #f8f8f8; color: #000;}
-        td {background-color: #fff;color: #000;}
-        td.score-1 {background-color: #d4edda;}
-        td.score-0_5 {background-color: #fff3cd;}
-        td.score-0 {background-color: #f8d7da;}
+        th {background-color: {'#f8f8f8' if theme == 'light' else '#2c2f36'};
+        color: {'#000' if theme == 'light' else '#fff'};}
+        td {background-color: {'#fff' if theme == 'light' else '#444444'};
+        color: {'#000' if theme == 'light' else '#fff'};}
+        td.score-1 {background-color: {'#d4edda' if theme == 'light' else '#1e5f24'};}
+        td.score-0_5 {background-color: {'#fff3cd' if theme == 'light' else '#c2a400'};}
+        td.score-0 {background-color: {'#f8d7da' if theme == 'light' else '#7e3e3e'};}
     
-        /* Dark mode styles */
-        @media (prefers-color-scheme: dark) {
-            th {background-color: #2c2f36;color: #fff;}
-            td {background-color: #444444;color: #fff;}
-            td.score-1 {background-color: #1e5f24;}
-            td.score-0_5 {background-color: #c2a400;}
-            td.score-0 {background-color: #7e3e3e;}
-        }
         </style>
         <table>
             <tr>
