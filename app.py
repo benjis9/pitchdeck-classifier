@@ -68,60 +68,95 @@ if st.session_state["authenticated"]:
         return base64.b64encode(buffer.getvalue()).decode("utf-8")
 
     def summarize_slide(text, image_b64, previous_summary="", retries=5):
-        messages = [
-            {"role": "system", "content": "You are a VC analyst. Analyze the pitch slide (text and image)."},
-            {"role": "user", "content": """
-                Summarize the key information related to Team, Business Model, and Traction from the slide. 
-                Answer the following questions for each slide:
+    messages = [
+        {"role": "system", "content": "You are a VC analyst. Analyze the pitch slide (text and image)."},
+        {"role": "user", "content": """
+            Summarize the key information related to Team, Business Model, and Traction from the slide. 
+            Consider the following questions for each slide, and use the examples below to guide your assessment:
 
-                **Team Evaluation:**
-                1. Does the founding team appear to be complete? Are there enough co-founders or advisors to strengthen their market fit?
-                2. Does the team have the strength and qualifications to compete in this particular industry or market?
-                3. Does the founding team have relevant industry experience?
-                4. Have the founders previously worked together?
+            **Team Evaluation:**
+            1. **Does the founding team appear to be complete?** 
+                - Look for whether the team is a single founder or a group. If the team consists of only one founder, it may be seen as a **red flag** unless they have strong experience or advisors. Teams with multiple founders or a well-rounded advisory board are often seen as more robust. 
+                - Example: "The team lacks co-founders, which may hinder collaboration and strategic decision-making."
 
-                **Business Model Evaluation:**
-                1. Is the business model scalable?
-                2. Does the business have the potential to add new product lines, services, or upsell to existing customers?
-                3. Is the business model resilient to external shocks?
-                4. Does the business create a new market or unlock a 'shadow market' that was previously untapped?
+            2. **Does the team have the strength and qualifications to compete in this particular industry or market?**
+                - Evaluate whether the team’s **background and skills** align with the industry. A strong team should have relevant experience and expertise.
+                - Example: "The founder has some experience in the tech space but lacks expertise in the fashion industry."
 
-                **Traction Evaluation:**
-                1. Does the business have initial customers or users?
-                2. Is the business demonstrating rapid growth?
-                3. Is there an indication of good customer retention?
-                4. What metrics or KPIs can demonstrate the business’s growth trajectory?
-            """}
+            3. **Does the founding team have relevant industry experience?**
+                - The more **direct experience** the team has in the industry, the higher the evaluation. If their experience is more **general** or from a **different industry**, their chances of success might be lower.
+                - Example: "The team has industry-relevant experience and the founder has built a successful startup before."
+
+            4. **Have the founders previously worked together?**
+                - Teams that have worked together in the past tend to perform better, especially if they’ve succeeded together before. Lack of prior collaboration might be a **concern**.
+                - Example: "The founder is working solo, which could be a **challenge** in building a strong, collaborative team."
+
+            **Business Model Evaluation:**
+            1. **Is the business model scalable?**
+                - Evaluate if the business can grow quickly without **substantial increases in costs**. Scalable models like **SaaS** or **digital-first businesses** tend to score higher, while **hardware or capital-intensive models** score lower.
+                - Example: "The business model is a digital marketplace, which is scalable."
+
+            2. **Does the business have the potential to add new product lines, services, or upsell to existing customers?**
+                - A **scalable business model** that allows for product/service **expansion** and **upselling** is more likely to succeed. Look for opportunities for **growth** beyond the initial offering.
+                - Example: "The business has the potential to diversify its product line and cross-sell additional services."
+
+            3. **Is the business model resilient to external shocks?**
+                - Consider whether the business is **immune** to risks like **regulatory changes** or **geopolitical factors**. Resilient business models like **software-only** businesses or those not reliant on global supply chains are less vulnerable.
+                - Example: "The business model is highly vulnerable to changes in international shipping regulations."
+
+            4. **Does the business create a new market or unlock a 'shadow market'?**
+                - If the business is **innovative** and disrupts an existing market or creates a **new category**, it’s more likely to succeed. If it’s entering an already saturated market, it may face **more competition**.
+                - Example: "The business targets a niche market in sustainable fashion, which is currently underserved."
+
+            **Traction Evaluation:**
+            1. **Does the business have initial customers or users?**
+                - Businesses with **early customers** are generally more likely to succeed. Look for **proof of market fit** (e.g., paying customers, partnerships).
+                - Example: "The business has initial customers, and it’s clear that there is demand for the product."
+
+            2. **Is the business demonstrating rapid growth?**
+                - Rapid growth is a strong indicator that the business is **scaling successfully**. Look for metrics like **user growth**, **revenue growth**, and **expansion into new markets**.
+                - Example: "The company is growing steadily, but the growth rate is not impressive yet."
+
+            3. **Is there an indication of good customer retention?**
+                - High retention rates or repeat customers indicate that the product or service is **meeting customer needs**. If retention is low, the business might face **sustainability issues**.
+                - Example: "Customer retention rates are low, which could indicate dissatisfaction with the product."
+
+            4. **What metrics or KPIs can demonstrate the business’s growth trajectory?**
+                - Look for **growth metrics** such as **revenue growth**, **user acquisition rates**, or **increased market share**.
+                - Example: "The business has shown strong growth in its customer base, increasing GMV by 30% month-over-month."
+
+        """}
+    ]
+
+    if previous_summary:
+        messages.append({"role": "assistant", "content": previous_summary})
+
+    # Add text and image for current slide
+    messages.append({
+        "role": "user",
+        "content": [
+            {"type": "text", "text": text},
+            {"type": "image_url", "image_url": {"url": f"data:image/png;base64,{image_b64}"}}
         ]
+    })
 
-        if previous_summary:
-            messages.append({"role": "assistant", "content": previous_summary})
+    for attempt in range(retries):
+        try:
+            response = client.chat.completions.create(
+                model="gpt-4o",
+                messages=messages,
+                temperature=0.3
+            )
+            return response.choices[0].message.content
+        except (RateLimitError, APIError) as e:
+            if attempt < retries - 1:
+                wait_time = 5 * (attempt + 1)
+                st.warning(f"⚠️ Rate limit hit or temporary error. Retrying in {wait_time}s...")
+                time.sleep(wait_time)
+            else:
+                st.error("❌ OpenAI API rate limit exceeded after retries.")
+                raise e
 
-        # Add text and image for current slide
-        messages.append({
-            "role": "user",
-            "content": [
-                {"type": "text", "text": text},
-                {"type": "image_url", "image_url": {"url": f"data:image/png;base64,{image_b64}"}}
-            ]
-        })
-
-        for attempt in range(retries):
-            try:
-                response = client.chat.completions.create(
-                    model="gpt-4o",
-                    messages=messages,
-                    temperature=0.3
-                )
-                return response.choices[0].message.content
-            except (RateLimitError, APIError) as e:
-                if attempt < retries - 1:
-                    wait_time = 5 * (attempt + 1)
-                    st.warning(f"⚠️ Rate limit hit or temporary error. Retrying in {wait_time}s...")
-                    time.sleep(wait_time)
-                else:
-                    st.error("❌ OpenAI API rate limit exceeded after retries.")
-                    raise e
 
     def score_deck(summary, retries=5):
         rubric_prompt = f"""
@@ -149,6 +184,71 @@ if st.session_state["authenticated"]:
             "Traction": {{"score": 0, "rationale": "..."}}
           }}
         }}
+
+        Use the criteria below to guide your evaluations:
+
+        **Team Evaluation:**
+        1. **Does the founding team appear to be complete?** 
+           - Score **1** if the team consists of multiple co-founders with complementary skill sets and/or has a strong **advisory board**. This is crucial for well-rounded decision-making and execution.
+           - Score **0.5** if the team has some experience but is missing key members or lacks a strong advisory board.
+           - Score **0** if the team has a single founder with limited expertise or no strong advisor network.
+        
+        2. **Does the team have the strength and qualifications to compete in this industry or market?**
+           - Score **1** if the team has deep industry experience or has successfully built similar companies before. Strong founders should have **domain expertise** and know the challenges of the market.
+           - Score **0.5** if the team has some relevant experience but lacks extensive or direct industry knowledge.
+           - Score **0** if the team has minimal experience or lacks knowledge in the market they are targeting.
+        
+        3. **Does the founding team have relevant industry experience?**
+           - Score **1** if the team has **direct experience** in the relevant industry, with clear examples of successful prior ventures or expertise.
+           - Score **0.5** if the experience is somewhat relevant but not directly applicable.
+           - Score **0** if the team lacks relevant industry experience and it is clear that they will need significant learning to succeed in the market.
+        
+        4. **Have the founders previously worked together?**
+           - Score **1** if the founders have worked together in the past, particularly if they have **succeeded** in building a previous startup or project.
+           - Score **0.5** if they have limited or **unproven collaboration history**.
+           - Score **0** if the founders have **never worked together** or have little evidence of working cohesively as a team.
+        
+        **Business Model Evaluation:**
+        1. **Is the business model scalable?**
+           - Score **1** if the business model is **highly scalable**, such as a **B2B SaaS** model, which can grow without significantly increasing costs.
+           - Score **0.5** if the business model has scalability potential but faces inherent limitations, such as high capital expenditure or operational complexity.
+           - Score **0** if the business model is **difficult to scale**, such as a highly **capex-intensive** hardware business.
+        
+        2. **Does the business have the potential to add new product lines, services, or upsell to existing customers?**
+           - Score **1** if the business has **clear potential for growth** by adding new products, expanding services, or creating upsell opportunities for existing customers (e.g., **cross-selling** or **expanding market reach**).
+           - Score **0.5** if there’s some opportunity for upselling or adding products, but it’s not fully explored or there are challenges in expanding the offering.
+           - Score **0** if the business lacks the ability to diversify or expand its product line and seems confined to a single offering.
+        
+        3. **Is the business model resilient to external shocks?**
+           - Score **1** if the business model is **resilient** to external risks like **economic downturns**, **regulatory changes**, or **geopolitical instability**. Businesses that are **software-only** or have strong IP protection are generally more resilient.
+           - Score **0.5** if the business has some degree of vulnerability to external factors but has mitigating strategies.
+           - Score **0** if the business is **highly vulnerable** to external risks, such as reliance on global supply chains or markets prone to sudden regulation changes.
+        
+        4. **Does the business create a new market or unlock a 'shadow market'?**
+           - Score **1** if the business model creates a **new market** or significantly **disrupts an existing market**, unlocking new opportunities (e.g., **disruptive innovation** or **addressing an unmet need**).
+           - Score **0.5** if the business model operates in an **existing market** but may have some level of differentiation or market opportunity.
+           - Score **0** if the business is operating in an **over-saturated market** or has little to no differentiation from existing competitors.
+        
+        **Traction Evaluation:**
+        1. **Does the business have initial customers or users?**
+           - Score **1** if the business has **early customers** or users, especially paying customers, or has clear evidence of **product-market fit**.
+           - Score **0.5** if the business has some customers, but it’s unclear whether they are early adopters or if the product is truly resonating with the market.
+           - Score **0** if the business has **no initial customers** or users, indicating a lack of product-market fit.
+        
+        2. **Is the business demonstrating rapid growth?**
+           - Score **1** if the business is showing **rapid growth** in key metrics such as **revenue**, **users**, or **market share**.
+           - Score **0.5** if the business is growing steadily but not at an **accelerated rate**.
+           - Score **0** if the business is **not growing quickly** and there’s limited indication of significant expansion.
+        
+        3. **Is there an indication of good customer retention?**
+           - Score **1** if the business has **high customer retention rates**, repeat customers, or **strong lifetime value (LTV)**.
+           - Score **0.5** if retention data is mixed or unclear but the business shows potential to retain customers with future iterations.
+           - Score **0** if retention is **low** or unclear, or if the business has no evidence of **customer loyalty**.
+        
+        4. **What metrics or KPIs can demonstrate the business’s growth trajectory?**
+           - Score **1** if the business shows clear **metrics** of success, such as **revenue growth**, **customer acquisition rates**, **GMV**, or **user engagement**.
+           - Score **0.5** if there are **some metrics** available, but they are insufficient to demonstrate long-term growth.
+           - Score **0** if there are **no key metrics** or KPIs available to demonstrate growth.
 
         IMPORTANT: Return ONLY valid JSON. No markdown, no extra text, no formatting like ```json.
 
