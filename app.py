@@ -280,51 +280,50 @@ if st.session_state["authenticated"]:
                     st.error("❌ OpenAI API rate limit exceeded after retries.")
                     raise e
 
-    def render_html_table(data):
-        
-    html = """
-    <style>
-    table {
-        width: 100%; 
-        border-collapse: collapse; 
-        margin-top: 20px;
-        background-color: #808080; 
-    }
-    th, td {
-        border: 1px solid #ccc; 
-        padding: 8px; 
-        text-align: center;
-        color: #000; 
-    }
-    th {
-        background-color: #b0b0b0;
-    }
-    td {
-        background-color: #808080;
-    }
-    td.score-1 {
-        background-color: #98fb98; /* Light green for score 1 */
-    }
-    td.score-0_5 {
-        background-color: #ffffe0; /* Light yellow for score 0.5 */
-    }
-    td.score-0 {
-        background-color: #f8d7da; /* Light red for score 0 */
-    }
-    </style>
-    <table>
-        <tr>
-            <th rowspan="2">#</th>
-            <th colspan="2">Team</th>
-            <th colspan="2">Business Model</th>
-            <th colspan="2">Traction</th>
-        </tr>
-        <tr>
-            <th>Score</th><th>Rationale</th>
-            <th>Score</th><th>Rationale</th>
-            <th>Score</th><th>Rationale</th>
-        </tr>
-    """
+    def render_html_table(data): 
+        html = """
+        <style>
+        table {
+            width: 100%; 
+            border-collapse: collapse; 
+            margin-top: 20px;
+            background-color: #808080; 
+        }
+        th, td {
+            border: 1px solid #ccc; 
+            padding: 8px; 
+            text-align: center;
+            color: #000; 
+        }
+        th {
+            background-color: #b0b0b0;
+        }
+        td {
+            background-color: #808080;
+        }
+        td.score-1 {
+            background-color: #98fb98; /* Light green for score 1 */
+        }
+        td.score-0_5 {
+            background-color: #ffffe0; /* Light yellow for score 0.5 */
+        }
+        td.score-0 {
+            background-color: #f8d7da; /* Light red for score 0 */
+        }
+        </style>
+        <table>
+            <tr>
+                <th rowspan="2">#</th>
+                <th colspan="2">Team</th>
+                <th colspan="2">Business Model</th>
+                <th colspan="2">Traction</th>
+            </tr>
+            <tr>
+                <th>Score</th><th>Rationale</th>
+                <th>Score</th><th>Rationale</th>
+                <th>Score</th><th>Rationale</th>
+            </tr>
+        """
         for i in range(1, 5):
             row = data[str(i)]
             def score_class(score):
