@@ -287,7 +287,7 @@ if st.session_state["authenticated"]:
             width: 100%; 
             border-collapse: collapse; 
             margin-top: 20px;
-            background-color: #808080; 
+            background-color: #f0f0f0; 
         }
         th, td {
             border: 1px solid #ccc; 
@@ -296,10 +296,10 @@ if st.session_state["authenticated"]:
             color: #000; 
         }
         th {
-            background-color: #b0b0b0;
+            background-color: #e0e0e0;
         }
         td {
-            background-color: #808080;
+            background-color: #f0f0f0;
         }
         td.score-1 {
             background-color: #98fb98; /* Light green for score 1 */
