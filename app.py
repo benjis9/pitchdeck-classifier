@@ -2,8 +2,6 @@ import streamlit as st
 import streamlit.components.v1 as components
 import fitz  # PyMuPDF
 import openai
-import tiktoken
-from datetime import datetime
 import json
 import os
 import time
@@ -11,6 +9,7 @@ import base64
 from openai import RateLimitError, APIError
 from PIL import Image
 from io import BytesIO
+from datetime import datetime
 
 # ---------------------------
 # STREAMLIT PAGE CONFIG
@@ -68,17 +67,45 @@ if st.session_state["authenticated"]:
         img.save(buffer, format="PNG")
         return base64.b64encode(buffer.getvalue()).decode("utf-8")
 
-    def summarize_slide(text, image_b64, retries=5):
+    def summarize_slide(text, image_b64, previous_summary="", retries=5):
         messages = [
             {"role": "system", "content": "You are a VC analyst. Analyze the pitch slide (text and image)."},
-            {
-                "role": "user",
-                "content": [
-                    {"type": "text", "text": "Summarize key information related to team, traction, and business model from the slide."},
-                    {"type": "image_url", "image_url": {"url": f"data:image/png;base64,{image_b64}"}}
-                ]
-            }
+            {"role": "user", "content": """
+                Summarize the key information related to Team, Business Model, and Traction from the slide. 
+                Answer the following questions for each slide:
+
+                **Team Evaluation:**
+                1. Does the founding team appear to be complete? Are there enough co-founders or advisors to strengthen their market fit?
+                2. Does the team have the strength and qualifications to compete in this particular industry or market?
+                3. Does the founding team have relevant industry experience?
+                4. Have the founders previously worked together?
+
+                **Business Model Evaluation:**
+                1. Is the business model scalable?
+                2. Does the business have the potential to add new product lines, services, or upsell to existing customers?
+                3. Is the business model resilient to external shocks?
+                4. Does the business create a new market or unlock a 'shadow market' that was previously untapped?
+
+                **Traction Evaluation:**
+                1. Does the business have initial customers or users?
+                2. Is the business demonstrating rapid growth?
+                3. Is there an indication of good customer retention?
+                4. What metrics or KPIs can demonstrate the business’s growth trajectory?
+            """}
         ]
+
+        if previous_summary:
+            messages.append({"role": "assistant", "content": previous_summary})
+
+        # Add text and image for current slide
+        messages.append({
+            "role": "user",
+            "content": [
+                {"type": "text", "text": text},
+                {"type": "image_url", "image_url": {"url": f"data:image/png;base64,{image_b64}"}}
+            ]
+        })
+
         for attempt in range(retries):
             try:
                 response = client.chat.completions.create(
@@ -98,31 +125,36 @@ if st.session_state["authenticated"]:
 
     def score_deck(summary, retries=5):
         rubric_prompt = f"""
-You are a VC analyst. Based on the summary below, return a JSON dictionary with the following exact structure (only use 0, 0.5 or 1 for scores):
+        You are a VC analyst. Based on the summary below, return a JSON dictionary with the following exact structure (only use 0, 0.5 or 1 for scores):
 
-{{
-  "1": {{
-    "Team": {{"score": 0, "rationale": "..."}},
-    "Business Model": {{"score": 0, "rationale": "..."}},
-    "Traction": {{"score": 0, "rationale": "..."}}
-  }},
-  "2": {{
-    "Team": {{"score": 0, "rationale": "..."}},
-    "Business Model": {{"score": 0, "rationale": "..."}},
-    "Traction": {{"score": 0, "rationale": "..."}}
-  }},
-  "3": {{
-    "Team": {{"score": 0, "rationale": "..."}},
-    "Business Model": {{"score": 0, "rationale": "..."}},
-    "Traction": {{"score": 0, "rationale": "..."}}
-  }}
-}}
+        {{
+          "1": {{
+            "Team": {{"score": 0, "rationale": "..."}} ,
+            "Business Model": {{"score": 0, "rationale": "..."}} ,
+            "Traction": {{"score": 0, "rationale": "..."}}
+          }},
+          "2": {{
+            "Team": {{"score": 0, "rationale": "..."}} ,
+            "Business Model": {{"score": 0, "rationale": "..."}} ,
+            "Traction": {{"score": 0, "rationale": "..."}}
+          }},
+          "3": {{
+            "Team": {{"score": 0, "rationale": "..."}} ,
+            "Business Model": {{"score": 0, "rationale": "..."}} ,
+            "Traction": {{"score": 0, "rationale": "..."}}
+          }},
+          "4": {{
+            "Team": {{"score": 0, "rationale": "..."}} ,
+            "Business Model": {{"score": 0, "rationale": "..."}} ,
+            "Traction": {{"score": 0, "rationale": "..."}}
+          }}
+        }}
 
-IMPORTANT: Return ONLY valid JSON. No markdown, no extra text, no formatting like ```json.
+        IMPORTANT: Return ONLY valid JSON. No markdown, no extra text, no formatting like ```json.
 
-Startup summary:
-{summary}
-"""
+        Startup summary:
+        {summary}
+        """
         for attempt in range(retries):
             try:
                 response = client.chat.completions.create(
@@ -172,10 +204,10 @@ Startup summary:
                 <th>Score</th><th>Rationale</th>
             </tr>
         """
-        for i in range(1, 4):
+        for i in range(1, 5):
             row = data[str(i)]
             def score_class(score):
-                return f"score-{str(score).replace('.', '_')}"
+                return f"score-{str(score).replace('.', '_')}"  # Generate class based on score value
 
             html += f"""
             <tr>
@@ -208,8 +240,21 @@ Startup summary:
             slide_img_b64 = get_image_base64(page)
             slides.append((slide_text, slide_img_b64))
 
+        # Process slides in batches to ensure context is kept without hitting token limits
+        context = ""
+        batch_size = 10  # Process 10 slides at a time (adjust based on token limit)
+
         with st.spinner("Summarizing each slide with image + text..."):
-            summaries = [summarize_slide(text, img_b64) for text, img_b64 in slides]
+            summaries = []
+            for i in range(0, len(slides), batch_size):
+                batch = slides[i:i + batch_size]
+                batch_summary = ""
+                for text, img_b64 in batch:
+                    batch_summary += summarize_slide(text, img_b64, previous_summary=context)
+                summaries.append(batch_summary)
+                context = batch_summary  # Update context for next batch
+
+            # Combine all the slide summaries
             combined_summary = "\n".join(summaries)
             score_data = score_deck(combined_summary)
             st.success("Analysis complete!")
