@@ -321,7 +321,7 @@ if st.session_state["authenticated"]:
             </tr>
             """
         html += "</table>"
-        components.html(html, height=600)
+        components.html(html, height=1200, width=1600)
 
     uploaded_file = st.file_uploader("Upload a pitch deck (PDF)", type=["pdf"])
 
@@ -358,6 +358,7 @@ if st.session_state["authenticated"]:
             combined_summary = "\n".join(summaries)
             score_data = score_deck(combined_summary)
             st.success("Analysis complete!")
+            st.text("Is this even working?")
             render_html_table(score_data)
 
         record_usage(usage, log_file)
