@@ -283,12 +283,23 @@ if st.session_state["authenticated"]:
     def render_html_table(data):
         html = """
         <style>
-        table { width: 100%; border-collapse: collapse; margin-top: 20px; }
-        th, td { border: 1px solid #ccc; padding: 8px; text-align: center; }
-        th { background-color: #f8f8f8; }
-        td.score-1 { background-color: #d4edda; }
-        td.score-0_5 { background-color: #fff3cd; }
-        td.score-0 { background-color: #f8d7da; }
+        /* Default light mode styles */
+        table {width: 100%; border-collapse: collapse; margin-top: 20px;}
+        th, td {border: 1px solid #ccc;  padding: 8px;  text-align: center;}
+        th {background-color: #f8f8f8; color: #000;}
+        td {background-color: #fff;color: #000;}
+        td.score-1 {background-color: #d4edda;}
+        td.score-0_5 {background-color: #fff3cd;}
+        td.score-0 {background-color: #f8d7da;}
+    
+        /* Dark mode styles */
+        @media (prefers-color-scheme: dark) {
+            th {background-color: #2c2f36;color: #fff;}
+            td {background-color: #444444;color: #fff;}
+            td.score-1 {background-color: #1e5f24;}
+            td.score-0_5 {background-color: #c2a400;}
+            td.score-0 {background-color: #7e3e3e;}
+        }
         </style>
         <table>
             <tr>
@@ -307,7 +318,7 @@ if st.session_state["authenticated"]:
             row = data[str(i)]
             def score_class(score):
                 return f"score-{str(score).replace('.', '_')}"  # Generate class based on score value
-
+    
             html += f"""
             <tr>
                 <td>{i}</td>
@@ -321,7 +332,7 @@ if st.session_state["authenticated"]:
             """
         html += "</table>"
         components.html(html, height=1200, width=1600)
-
+        
     uploaded_file = st.file_uploader("Upload a pitch deck (PDF)", type=["pdf"])
 
     if uploaded_file:
