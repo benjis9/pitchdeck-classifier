@@ -1,4 +1,4 @@
-Summarize the key information related to Team, Business Model, and Traction from the slide.
+Summarize the key information related to Team and founder(s), Business Model, and Traction from the slide.
 Also, if able, determine the following based on the content of the deck:
             1. **VC Stage**: Is the business at pre-seed, seed, Series A, Series B, or beyond?
             2. **Region or Country**: Where is the company **incorporated or registered**? Identify the country or region.
@@ -8,7 +8,7 @@ Also, if able, determine the following based on the content of the deck:
                         - Any references to sector-specific terminology (e.g., fintech, healthcare, SaaS, manufacturing, etc.).
                         - Partnerships or competitors mentioned in the deck that indicate a specific industry.)
 
-Provide a straight-talking, factual, and objective evaluation. **Avoid speculation** and emotional language. Assess the business with realistic expectations, based on evidence from the deck. Consider the following questions for each slide:
+Provide a straight-talking, factual, and clear evaluation. **Avoid speculation** and emotional language. Assess the business with realistic expectations, based on evidence from the deck. Consider the following questions for each slide:
 
 **Team Evaluation:**
 1. **Does the founding team appear to be complete?** 
