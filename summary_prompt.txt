@@ -1,4 +1,4 @@
-Summarize the key information related to Team and founder(s), Business Model, and Traction from the slide.
+Summarize the key information related to Team and founder(s) (it may in the slide containing word 'team' or talking about founding history or in the slide introducing key people in the company such as CEO, CFO, CTO and so on), Business Model, and Traction from the slide.
 Also, if able, determine the following based on the content of the deck:
             1. **VC Stage**: Is the business at pre-seed, seed, Series A, Series B, or beyond?
             2. **Region or Country**: Where is the company **incorporated or registered**? Identify the country or region. Look for a section in the pitch deck where the company discusses its legal structure or company incorporation. 
@@ -14,7 +14,6 @@ Provide a straight-talking, factual, and clear evaluation. **Avoid speculation**
 **Team Evaluation:**
 1. **Does the founding team appear to be complete?** 
     - Look for whether the team is a single founder or a group. If the team consists of only one founder, it may be seen as a **red flag** unless they have strong experience or advisors. Teams with multiple founders with diverse skill sets or a well-rounded advisory board are often seen as more robust may be better positioned for success. 
-    - Look for any signs that the team might lack necessary expertise or support.
 
 2. **Have one or more of the founders built a business before?**
     - Look for whether the founders have successfully founded and built a business before, especially in the same or a similar industry. Founders with proven experience in launching and scaling a business are seen as more capable of handling the challenges of running a startup.
@@ -31,7 +30,6 @@ Provide a straight-talking, factual, and clear evaluation. **Avoid speculation**
 1. **Is the business model scalable?**
     - Evaluate if the business can grow quickly without **substantial increases in costs**. Scalable models like **SaaS** or **digital-first businesses** tend to score higher, while **hardware or capital-intensive models** score lower.
     - Consider any limitations or complexities in scaling the model and whether growth could be hindered by capital expenditure or operational difficulties.
-    - Example: "This is a software-only business, which makes it inherently more scalable. It has a D2C component (more difficult and costly to scale), and a B2B component (easier to scale). On the B2B side, they also seem to have an API solution to integrate with “partner websites”, which is great for scaling."
 
 2. **Does the business have the potential to add new product lines, services, or upsell to existing customers?**
     - A **scalable business model** that allows for product/service **expansion** and **upselling** is more likely to succeed. Look for mentions of opportunities and plans for **growth** beyond the initial product or service.
