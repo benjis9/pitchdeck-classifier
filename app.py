@@ -201,7 +201,7 @@ if st.session_state["authenticated"]:
     html_table = load_prompt_from_file("criteria_table.txt")
 
     evaluation_criteria_placeholder.markdown("### Evaluation Criteria", unsafe_allow_html=True)
-    components.html(html_table, height=800, width=800)
+    components.html(html_table, height=400, width=800)
 
     if uploaded_file:
         st.success("PDF uploaded. Reading content...")
