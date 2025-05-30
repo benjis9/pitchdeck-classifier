@@ -1,4 +1,11 @@
-You are a VC analyst. Based on the pitchdeck summary below, return a JSON dictionary with the following exact structure (only use 0, 0.5 or 1 for scores):
+You are a VC analyst. Based on the pitchdeck summary below score the business (only use 0, 0.5 or 1 for scores). 
+Additionally, determine and extract the following information:
+    
+        1. **VC Stage**: Identify whether the business is at pre-seed, seed, Series A, Series B, or beyond.
+        2. **Region or Country**: Identify the country or region where the business is incorporated or registered.
+        3. **Industry**: Identify the industry the business is operating in based on the content provided.:
+
+Return a JSON dictionary with the following exact structure:
 
         {{
           "1": {{
@@ -20,6 +27,11 @@ You are a VC analyst. Based on the pitchdeck summary below, return a JSON dictio
             "Team": {{"score": 0, "rationale": "..."}} ,
             "Business Model": {{"score": 0, "rationale": "..."}} ,
             "Traction": {{"score": 0, "rationale": "..."}}
+          }},
+          "info": {{
+            "VC Stage": "...",
+            "Region": "...",
+            "Industry": "..."
           }}
         }}
 
@@ -90,5 +102,5 @@ Provide a **straight-talking, factual, and objective evaluation**. Avoid specula
 
 IMPORTANT: Return ONLY valid JSON. No markdown, no extra text, no formatting like ```json.
 
-Startup pitchdeck summary:
+Startup pitch deck summary:
 {summary}
