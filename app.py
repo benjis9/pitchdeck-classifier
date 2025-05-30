@@ -114,11 +114,11 @@ if st.session_state["authenticated"]:
                     - Example: "The business has initial customers, and it’s clear that there is demand for the product."
 
                 2. **Is the business demonstrating rapid growth?**
-                    - Rapid growth is a strong indicator that the business is **scaling successfully**. Look for metrics like **user growth**, **revenue growth**, and **expansion into new markets**.
+                    - Rapid growth is a strong indicator that the business is **scaling successfully**. Look for metrics like **user growth**, **revenue growth**, and **expansion into new markets** and compare it with the standards for this type of business.
                     - Example: "The company is growing steadily, but the growth rate is not impressive yet."
 
                 3. **Is there an indication of good customer retention?**
-                    - High retention rates or repeat customers indicate that the product or service is **meeting customer needs**. If retention is low, the business might face **sustainability issues**.
+                    - High retention rates or repeat customers indicate that the product or service is **meeting customer needs**. If retention is low, the business might face **sustainability issues**. Compare it with the standards for this type of business.
                     - Example: "Customer retention rates are low, which could indicate dissatisfaction with the product."
 
                 4. **What metrics or KPIs can demonstrate the business’s growth trajectory?**
@@ -183,7 +183,7 @@ if st.session_state["authenticated"]:
           }}
         }}
 
-        Use the criteria below to guide your evaluations:
+        Provide a **straight-talking, factual, and objective evaluation**. Avoid speculation and emotional language. Assess the business with realistic expectations, based on evidence from the deck. Be neutral — neither too optimistic nor too pessimistic. Use the criteria below to guide your evaluations:
 
         **Team Evaluation:**
         1. **Does the founding team appear to be complete?** 
