@@ -141,11 +141,6 @@ if st.session_state["authenticated"]:
                 else:
                     st.error("❌ OpenAI API rate limit exceeded after retries.")
                     raise e
-
-    def load_html_table(filename):
-        # Load the HTML content from the file in the repository
-        with open(filename, 'r') as f:
-            return f.read()
     
     def render_html_table(data): 
         html = """
@@ -200,7 +195,7 @@ if st.session_state["authenticated"]:
         html += "</table>"
         components.html(html, height=1200, width=1600)
         
-    html_table = load_html_table("criteria_table.html")
+    html_table = load_prompt_from_file("criteria_table.txt")
     components.html(html_table, height=1200, width=1600)
     
     uploaded_file = st.file_uploader("Upload a pitch deck (PDF)", type=["pdf"])
