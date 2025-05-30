@@ -1,7 +1,8 @@
 Summarize the key information related to Team and founder(s), Business Model, and Traction from the slide.
 Also, if able, determine the following based on the content of the deck:
             1. **VC Stage**: Is the business at pre-seed, seed, Series A, Series B, or beyond?
-            2. **Region or Country**: Where is the company **incorporated or registered**? Identify the country or region.
+            2. **Region or Country**: Where is the company **incorporated or registered**? Identify the country or region. Look for a section in the pitch deck where the company discusses its legal structure or company incorporation. 
+Some pitch decks include an address for the company's headquarters, which can often be found in the footer or the contact section of the deck. If this information is available, it can provide a direct clue about the company’s location.
             3. **Industry**: What industry is the business operating in? (Consider the following:
                         - The core product or service offered by the company.
                         - The target market, such as whether it’s B2B or B2C.
