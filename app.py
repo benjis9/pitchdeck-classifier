@@ -142,6 +142,11 @@ if st.session_state["authenticated"]:
                     st.error("❌ OpenAI API rate limit exceeded after retries.")
                     raise e
 
+    def load_html_table(filename):
+        # Load the HTML content from the file in the repository
+        with open(filename, 'r') as f:
+            return f.read()
+    
     def render_html_table(data): 
         html = """
         <style>
@@ -157,21 +162,11 @@ if st.session_state["authenticated"]:
             text-align: center;
             color: #000; 
         }
-        th {
-            background-color: #e0e0e0;
-        }
-        td {
-            background-color: #f0f0f0;
-        }
-        td.score-1 {
-            background-color: #98fb98; /* Light green for score 1 */
-        }
-        td.score-0_5 {
-            background-color: #ffffe0; /* Light yellow for score 0.5 */
-        }
-        td.score-0 {
-            background-color: #f8d7da; /* Light red for score 0 */
-        }
+        th {background-color: #e0e0e0;}
+        td {background-color: #f0f0f0;}
+        td.score-1 {background-color: #98fb98;} /* Light green for score 1 */
+        td.score-0_5 {background-color: #ffffe0;} /* Light yellow for score 0.5 */
+        td.score-0 {background-color: #f8d7da;} /* Light red for score 0 */
         </style>
         <table>
             <tr>
@@ -205,6 +200,9 @@ if st.session_state["authenticated"]:
         html += "</table>"
         components.html(html, height=1200, width=1600)
         
+    html_table = load_html_table("criteria_table.html")
+    components.html(html_table, height=1200, width=1600)
+    
     uploaded_file = st.file_uploader("Upload a pitch deck (PDF)", type=["pdf"])
 
     if uploaded_file:
