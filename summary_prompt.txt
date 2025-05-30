@@ -1,5 +1,14 @@
 Summarize the key information related to Team, Business Model, and Traction from the slide.
-Provide a straight-talking, factual, and objective evaluation. Avoid speculation and emotional language. Assess the business with realistic expectations, based on evidence from the deck. Consider the following questions for each slide:
+Also, if able, determine the following based on the content of the deck:
+            1. **VC Stage**: Is the business at pre-seed, seed, Series A, Series B, or beyond?
+            2. **Region or Country**: Where is the company **incorporated or registered**? Identify the country or region.
+            3. **Industry**: What industry is the business operating in? (Consider the following:
+                        - The core product or service offered by the company.
+                        - The target market, such as whether it’s B2B or B2C.
+                        - Any references to sector-specific terminology (e.g., fintech, healthcare, SaaS, manufacturing, etc.).
+                        - Partnerships or competitors mentioned in the deck that indicate a specific industry.)
+
+Provide a straight-talking, factual, and objective evaluation. **Avoid speculation** and emotional language. Assess the business with realistic expectations, based on evidence from the deck. Consider the following questions for each slide:
 
 **Team Evaluation:**
 1. **Does the founding team appear to be complete?** 
