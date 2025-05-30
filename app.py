@@ -197,9 +197,12 @@ if st.session_state["authenticated"]:
     
     uploaded_file = st.file_uploader("Upload a pitch deck (PDF)", type=["pdf"])
 
-    st.text("Evaluation Criteria")
-    html_table = load_prompt_from_file("criteria_table.txt")
-    components.html(html_table, height=1200, width=1600)
+    evaluation_criteria_placeholder = st.empty()
+
+    with evaluation_criteria_placeholder:
+        st.text("Evaluation Criteria")
+        html_table = load_prompt_from_file("criteria_table.txt")
+        components.html(html_table, height=1200, width=1600)
 
     if uploaded_file:
         st.success("PDF uploaded. Reading content...")
