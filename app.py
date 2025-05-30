@@ -306,6 +306,12 @@ if st.session_state["authenticated"]:
             """
 
             evaluation_info_placeholder = st.empty()
+            st.write(extracted_info)
+            st.write(vc_stage)
+            st.write(region)
+            st.write(industry)
+            st.write(total_score)
+            st.write(percentage)
 
             evaluation_info_placeholder.markdown(evaluation_info)
             render_html_table(score_data)
