@@ -113,7 +113,7 @@ if st.session_state["authenticated"]:
 
     def score_deck(summary, retries=5):
         rubric_prompt = f"""
-        You are a VC analyst. Based on the summary below, return a JSON dictionary with the following exact structure (only use 0, 0.5 or 1 for scores):
+        You are a VC analyst. Based on the pitchdeck summary below, return a JSON dictionary with the following exact structure (only use 0, 0.5 or 1 for scores):
 
         {{
           "1": {{
@@ -138,7 +138,7 @@ if st.session_state["authenticated"]:
           }}
         }}
 
-        Provide a **straight-talking, factual, and objective evaluation**. Avoid speculation and emotional language. Assess the business with realistic expectations, based on evidence from the deck. Be neutral — neither too optimistic nor too pessimistic. Use the criteria below to guide your evaluations:
+        Provide a **straight-talking, factual, and objective evaluation**. Avoid speculation and emotional language. Assess the business with realistic expectations, based on evidence from the deck. Use the criteria below to guide your evaluations:
 
         **Team Evaluation:**
         1. **Does the founding team appear to be complete?** 
@@ -205,7 +205,7 @@ if st.session_state["authenticated"]:
 
         IMPORTANT: Return ONLY valid JSON. No markdown, no extra text, no formatting like ```json.
 
-        Startup summary:
+        Startup pitchdeck summary:
         {summary}
         """
 
