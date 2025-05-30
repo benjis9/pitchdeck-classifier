@@ -99,7 +99,7 @@ if st.session_state["authenticated"]:
                 response = client.chat.completions.create(
                     model="gpt-4o",
                     messages=messages,
-                    temperature=0.4
+                    temperature=0.3
                 )
                 return response.choices[0].message.content
             except (RateLimitError, APIError) as e:
