@@ -1,3 +1,28 @@
+You are a VC analyst. Based on the pitchdeck summary below, return a JSON dictionary with the following exact structure (only use 0, 0.5 or 1 for scores):
+
+        {{
+          "1": {{
+            "Team": {{"score": 0, "rationale": "..."}} ,
+            "Business Model": {{"score": 0, "rationale": "..."}} ,
+            "Traction": {{"score": 0, "rationale": "..."}}
+          }},
+          "2": {{
+            "Team": {{"score": 0, "rationale": "..."}} ,
+            "Business Model": {{"score": 0, "rationale": "..."}} ,
+            "Traction": {{"score": 0, "rationale": "..."}}
+          }},
+          "3": {{
+            "Team": {{"score": 0, "rationale": "..."}} ,
+            "Business Model": {{"score": 0, "rationale": "..."}} ,
+            "Traction": {{"score": 0, "rationale": "..."}}
+          }},
+          "4": {{
+            "Team": {{"score": 0, "rationale": "..."}} ,
+            "Business Model": {{"score": 0, "rationale": "..."}} ,
+            "Traction": {{"score": 0, "rationale": "..."}}
+          }}
+        }}
+
 Provide a **straight-talking, factual, and objective evaluation**. Avoid speculation and emotional language. Assess the business with realistic expectations, based on evidence from the deck. Use the criteria below to guide your evaluations:
 
 **Team Evaluation:**
@@ -64,3 +89,6 @@ Provide a **straight-talking, factual, and objective evaluation**. Avoid specula
    - Score **0** if there are **no key metrics** or KPIs available to demonstrate growth.
 
 IMPORTANT: Return ONLY valid JSON. No markdown, no extra text, no formatting like ```json.
+
+Startup pitchdeck summary:
+{summary}
