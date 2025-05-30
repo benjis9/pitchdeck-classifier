@@ -87,7 +87,6 @@ The final results are presented, including:
 Launch the Streamlit app:
 
 ```bash
-Copy
 streamlit run app.py
 ```
 
@@ -102,5 +101,7 @@ This project is licensed under the MIT License - see the LICENSE file for detail
 
 ## Acknowledgements
 Contrarian Ventures for providing pitch decks for testing and validation.
+
 OpenAI for the GPT-4 API to analyze and score pitch decks.
+
 PyMuPDF and PIL for processing PDF files and images.
