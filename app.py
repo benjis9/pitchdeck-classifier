@@ -252,24 +252,10 @@ if st.session_state["authenticated"]:
             
             st.success("Analysis complete!")
 
-            evaluation_info = f"""
-            **VC Stage**: {vc_stage}  
-            **Region**: {region}  
-            **Industry**: {industry}  
-            **Final Score**: {total_score}/{total_available} ({percentage:.2f}%)
-            """
-
-            evaluation_info_placeholder = st.empty()
-            st.write(vc_stage)
-            st.write(region)
-            st.write(industry)
-            st.write(total_score)
-            st.write(percentage)
-
             st.markdown(f"### VC Stage: {vc_stage}")
             st.markdown(f"### Region: {region}")
             st.markdown(f"### Industry: {industry}")
-            st.markdown(f"### Final Score: {total_score}")
+            st.markdown(f"### Final Score: {total_score}/{total_available} ({percentage:.2f}%)")
             
             render_html_table(score_data)
 
