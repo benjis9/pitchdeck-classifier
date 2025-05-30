@@ -142,6 +142,52 @@ if st.session_state["authenticated"]:
                     st.error("❌ OpenAI API rate limit exceeded after retries.")
                     raise e
     
+    def extract_vc_stage_region_industry(summary, retries=5):
+        prompt = f"""
+        Based on the following summary of a pitch deck, determine and extract the following information:
+    
+        1. **VC Stage**: Identify whether the business is at pre-seed, seed, Series A, Series B, or beyond.
+        2. **Region or Country**: Identify the country or region where the business is incorporated or registered.
+        3. **Industry**: Identify the industry the business is operating in based on the content provided.
+    
+        Summary:
+        {summary}
+    
+        Return the result as a JSON dictionary with the keys "VC Stage", "Region", and "Industry".
+        Example response format:
+        {{
+            "VC Stage": "Seed",
+            "Region": "United States",
+            "Industry": "Fintech"
+        }}
+
+        IMPORTANT: Return ONLY valid JSON. No markdown, no extra text, no formatting like ```json.
+        """
+
+        for attempt in range(retries):
+            try:
+                response = openai.Completion.create(
+                    model="gpt-4o",
+                    prompt=prompt,
+                    temperature=0.3,
+                    max_tokens=200
+                )
+                content = response.choices[0].text.strip()
+                
+                # Parse the response to ensure it's in the correct format
+                return json.loads(content)  # Ensure the model returns valid JSON
+            except (openai.error.RateLimitError, openai.error.APIError) as e:
+                if attempt < retries - 1:
+                    wait_time = 5 * (attempt + 1)
+                    print(f"⚠️ Rate limit hit or temporary error. Retrying in {wait_time}s...")
+                    time.sleep(wait_time)
+                else:
+                    print("❌ OpenAI API rate limit exceeded after retries.")
+                    raise e
+            except json.JSONDecodeError as je:
+                print(f"❌ Failed to parse JSON: {content}")
+                raise je
+    
     def render_html_table(data): 
         html = """
         <style>
@@ -233,8 +279,32 @@ if st.session_state["authenticated"]:
 
             # Combine all the slide summaries
             combined_summary = "\n".join(summaries)
+            
+            extracted_info = extract_vc_stage_region_industry(combined_summary)
+            vc_stage = extracted_info["VC Stage"]
+            region = extracted_info["Region"]
+            industry = extracted_info["Industry"]
+            
             score_data = score_deck(combined_summary)
+            
+            total_score = 0.0
+            total_available = 0
+            for i in range(1, 5): 
+                row = score_data[str(i)]
+                total_score += row['Team']['score'] + row['Business Model']['score'] + row['Traction']['score']
+                total_available += 3  
+
+            percentage = (total_score / total_available) * 100
+            
             st.success("Analysis complete!")
+
+            evaluation_info = f"""
+            **VC Stage**: {vc_stage}  
+            **Region**: {region}  
+            **Industry**: {industry}  
+            **Final Score**: {total_score}/{total_available} ({percentage:.2f}%)
+            """
+            st.markdown(evaluation_info)
             render_html_table(score_data)
 
         record_usage(usage, log_file)
