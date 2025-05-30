@@ -1,0 +1,46 @@
+"""
+<style>
+table { width: 100%; border-collapse: collapse; margin-top: 20px; background-color: #f0f0f0;}
+th, td { border: 1px solid #ccc; padding: 8px; color: #000;}
+th {text-align: center;} 
+td {text-align: left;}
+th { background-color: #e0e0e0;}
+td { background-color: #f0f0f0;}
+</style>
+<table>
+    <tr>
+        <th>#</th>
+        <th>Team</th>
+        <th>Business Model</th>
+        <th>Traction</th>
+    </tr>
+
+    <tr>
+        <td>1</td>
+        <td>Does the founding team appear to be complete?</td>
+        <td>Is the business model easily scalable?</td>
+        <td>Does the business have initial customers or users?</td>
+    </tr>
+
+    <tr>
+        <td>2</td>
+        <td>Have one or more of the founders built a business before?</td>
+        <td>Does the business have the potential to add new product lines, services, or upsell to existing customers?</td>
+        <td>Is the business demonstrating rapid growth?</td>
+    </tr>
+
+    <tr>
+        <td>3</td>
+        <td>Does the founding team have relevant industry experience?</td>
+        <td>Is the business model resilient to external shocks?</td>
+        <td>Is there an indication of good customer retention?</td>
+    </tr>
+
+    <tr>
+        <td>4</td>
+        <td>Have the founders previously worked together?</td>
+        <td>Does the business create a new market or unlock a 'shadow market'?</td>
+        <td>What metrics or KPIs can demonstrate the business’s growth trajectory?</td>
+    </tr>
+    </table>
+    """
