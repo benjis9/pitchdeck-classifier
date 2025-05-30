@@ -29,16 +29,16 @@ Provide a **straight-talking, factual, and objective evaluation**. Avoid specula
 1. **Does the founding team appear to be complete?** 
    - Score **1** if the team consists of multiple co-founders with complementary skill sets and/or has a strong **advisory board**. This is crucial for well-rounded decision-making and execution.
    - Score **0.5** if the team has some experience but is missing key members or lacks a strong advisory board.
-   - Score **0** if the team has a single founder with limited expertise or no strong advisor network.
+   - Score **0** if the team has a single founder and no advisors or founders with limited expertise or no strong advisor network.
 
-2. **Does the team have the strength and qualifications to compete in this industry or market?**
-   - Score **1** if the team has deep industry experience or has successfully built similar companies before. Strong founders should have **domain expertise** and know the challenges of the market.
-   - Score **0.5** if the team has some relevant experience but lacks extensive or direct industry knowledge.
-   - Score **0** if the team has minimal experience or lacks knowledge in the market they are targeting.
+2. **Have one or more of the founders built a business before?**
+   - Score **1** if one or more founders have successfully founded and built a business, especially in the same or a similar industry. This demonstrates their ability to navigate the challenges of starting and scaling a company. 
+   - Score **0.5** if the founders have some entrepreneurial experience but have not yet successfully scaled a business or have only been involved in small-scale ventures.
+   - Score **0** if none of the founders have prior experience in building or scaling a business. This raises concerns about their ability to handle the complexities of running a startup.
 
 3. **Does the founding team have relevant industry experience?**
-   - Score **1** if the team has **direct experience** in the relevant industry, with clear examples of successful prior ventures or expertise.
-   - Score **0.5** if the experience is somewhat relevant but not directly applicable.
+   - Score **1** if the team has **direct experience** in the relevant industry, with clear examples of successful prior ventures or expertise. Strong founders should have **domain expertise** and know the challenges of the market.
+   - Score **0.5** if the experience is somewhat relevant but not directly applicable or founders lack extensive or direct industry knowledge.
    - Score **0** if the team lacks relevant industry experience and it is clear that they will need significant learning to succeed in the market.
 
 4. **Have the founders previously worked together?**
@@ -47,14 +47,14 @@ Provide a **straight-talking, factual, and objective evaluation**. Avoid specula
    - Score **0** if the founders have **never worked together** or have little evidence of working cohesively as a team.
 
 **Business Model Evaluation:**
-1. **Is the business model scalable?**
-   - Score **1** if the business model is **highly scalable**, such as a **B2B SaaS** model, which can grow without significantly increasing costs.
-   - Score **0.5** if the business model has scalability potential but faces inherent limitations, such as high capital expenditure or operational complexity.
+1. **Is the business model easily scalable?**
+   - Score **1** if the business model is **highly scalable**, such as a **B2B SaaS** model, which can grow without significantly increasing costs and that's mentioned in the pitchdeck summary.
+   - Score **0.5** if the business model has scalability potential but faces inherent limitations, such as high capital expenditure or operational complexity or is highly scalable but no mention of such plans in the pitch.
    - Score **0** if the business model is **difficult to scale**, such as a highly **capex-intensive** hardware business.
 
 2. **Does the business have the potential to add new product lines, services, or upsell to existing customers?**
    - Score **1** if the business has **clear potential for growth** by adding new products, expanding services, or creating upsell opportunities for existing customers (e.g., **cross-selling** or **expanding market reach**).
-   - Score **0.5** if there’s some opportunity for upselling or adding products, but it’s not fully explored or there are challenges in expanding the offering.
+   - Score **0.5** if there’s some opportunity for upselling or adding products, but it’s not fully explored in the pitchdeck or there are challenges in expanding the offering.
    - Score **0** if the business lacks the ability to diversify or expand its product line and seems confined to a single offering.
 
 3. **Is the business model resilient to external shocks?**
@@ -84,7 +84,7 @@ Provide a **straight-talking, factual, and objective evaluation**. Avoid specula
    - Score **0** if retention is **low** or unclear, or if the business has no evidence of **customer loyalty**.
 
 4. **What metrics or KPIs can demonstrate the business’s growth trajectory?**
-   - Score **1** if the business shows clear **metrics** of success, such as **revenue growth**, **customer acquisition rates**, **GMV**, or **user engagement**.
+   - Score **1** if the business shows multiple clear **metrics** of success, such as **revenue growth**, **customer acquisition rates**, **GMV**, or **user engagement**.
    - Score **0.5** if there are **some metrics** available, but they are insufficient to demonstrate long-term growth.
    - Score **0** if there are **no key metrics** or KPIs available to demonstrate growth.
 
