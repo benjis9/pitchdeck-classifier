@@ -304,7 +304,10 @@ if st.session_state["authenticated"]:
             **Industry**: {industry}  
             **Final Score**: {total_score}/{total_available} ({percentage:.2f}%)
             """
-            st.markdown(evaluation_info)
+
+            evaluation_info_placeholder = st.empty()
+
+            evaluation_info_placeholder.markdown(evaluation_info)
             render_html_table(score_data)
 
         record_usage(usage, log_file)
