@@ -61,7 +61,7 @@ if st.session_state["authenticated"]:
             json.dump(usage, f)
 
     def get_image_base64(page):
-        pix = page.get_pixmap(dpi=150)
+        pix = page.get_pixmap(dpi=120)
         img = Image.frombytes("RGB", [pix.width, pix.height], pix.samples)
         buffer = BytesIO()
         img.save(buffer, format="PNG")
@@ -207,7 +207,7 @@ if st.session_state["authenticated"]:
         st.success("PDF uploaded. Reading content...")
 
         count_today, usage, log_file = get_usage_today()
-        if count_today >= 25:
+        if count_today >= 50:
             st.error("🚫 Daily usage limit reached for this demo. Please try again tomorrow.")
             st.stop()
 
