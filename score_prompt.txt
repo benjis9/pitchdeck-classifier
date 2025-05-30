@@ -1,8 +1,8 @@
 You are a VC analyst. Based on the pitchdeck summary below score the business (only use 0, 0.5 or 1 for scores). 
-Additionally, determine and extract the following information:
+Additionally, determine and extract the following information (write 'Unknown' if confidence below 95%):
     
         1. **VC Stage**: Identify whether the business is at pre-seed, seed, Series A, Series B, or beyond.
-        2. **Region or Country**: Identify the country or region where the business is incorporated or registered.
+        2. **Region or Country**: Identify the country or region where the business is incorporated or registered. May be mentioned under legal structure or company incorporation or where the main HQ is.
         3. **Industry**: Identify the industry the business is operating in based on the content provided.:
 
 Return a JSON dictionary with the following exact structure:
