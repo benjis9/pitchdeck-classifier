@@ -89,7 +89,8 @@ Launch the Streamlit app:
 ```bash
 Copy
 streamlit run app.py
-##
+```
+
 Log in: Use the password defined in the .streamlit/secrets.toml file.
 
 Upload a Pitch Deck: Once logged in, upload a PDF pitch deck using the interface.
