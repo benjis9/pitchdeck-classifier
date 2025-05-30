@@ -74,24 +74,22 @@ Each category is scored on a 0-1 scale:
 
 ## Example Workflow
 The VC investor uploads a pitch deck.
-
 The tool processes the deck, extracting key information (VC stage, region, industry) and summarizing the text and images.
-
 The pitch deck is scored based on the rubric.
-
 The final results are presented, including:
 
-**VC Stage**: (e.g., Pre-Seed, Seed, Series A)
-**Region**: (e.g., Europe, Israel)
-**Industry**: (e.g., Climate-Tech, SaaS)
-**Final Score**: (Total points out of maximum score)
+- **VC Stage**: (e.g., Pre-Seed, Seed, Series A)
+- **Region**: (e.g., Europe, Israel)
+- **Industry**: (e.g., Climate-Tech, SaaS)
+- **Final Score**: (Total points out of maximum score)
 
 ## Usage Instructions
 Launch the Streamlit app:
 
-bash
+```bash
 Copy
-streamlit run app.py
+streamlit run app.py```
+
 Log in: Use the password defined in the .streamlit/secrets.toml file.
 
 Upload a Pitch Deck: Once logged in, upload a PDF pitch deck using the interface.
