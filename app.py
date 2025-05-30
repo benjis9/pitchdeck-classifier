@@ -196,7 +196,7 @@ if st.session_state["authenticated"]:
         components.html(html, height=1200, width=1600)
         
     html_table = load_prompt_from_file("criteria_table.txt")
-    /* components.html(html_table, height=1200, width=1600) */
+    ## components.html(html_table, height=1200, width=1600)
     st.markdown(html_table, unsafe_allow_html=True)
     
     uploaded_file = st.file_uploader("Upload a pitch deck (PDF)", type=["pdf"])
