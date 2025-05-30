@@ -176,6 +176,7 @@ if st.session_state["authenticated"]:
                 <th>Score</th><th>Rationale</th>
             </tr>
         """
+        
         for i in range(1, 5):
             row = data[str(i)]
             def score_class(score):
