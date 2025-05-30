@@ -16,8 +16,6 @@ Venture capital firms typically receive thousands of pitch decks every year, oft
 - **Pitch Deck Analysis**: The tool processes the pitch deck, extracting the VC stage, region/country, and industry.
 - **Grading and Evaluation**: The pitch deck is graded using a custom rubric that evaluates the startup’s team, business model, and traction.
 
-**Summary Information**: The application provides a summary of the startup’s stage, industry, region, and final score.
-
 ## Scoring System: 
 Each pitch deck is evaluated on:
 
@@ -50,19 +48,19 @@ Display Results: The VC stage, region, industry, and final score are displayed t
 ## Grading Rubric
 The pitch decks are evaluated based on the following criteria:
 
-## Team Evaluation:
+### Team Evaluation:
 1. Does the founding team appear to be complete?
 2. Have one or more of the founders built a business before?
 3. Does the founding team have relevant industry experience?
 4. Have the founders previously worked together?
 
-## Business Model Evaluation:
+### Business Model Evaluation:
 1. Is the business model easily scalable?
 2. Does the business have the potential to add new product lines, services, or upsell to existing customers?
 3. Is the business model resilient to external shocks?
 4. Does the business create a new market or unlock a 'shadow market'?
 
-## Traction Evaluation:
+### Traction Evaluation:
 1. Does the business have initial customers or users?
 2. Is the business demonstrating rapid growth?
 3. Is there an indication of good customer retention?
