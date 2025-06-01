@@ -207,19 +207,23 @@ if st.session_state["authenticated"]:
         context = ""
         batch_size = 10  # Process 10 slides at a time (adjust based on token limit)
 
-        with st.spinner("Summarizing each slide with image + text..."):
+        with st.spinner("Evaluating the deck..."):
             summaries = []
             for i in range(0, len(slides), batch_size):
                 batch = slides[i:i + batch_size]
-                batch_summary = ""
-                for text in batch:
-                    batch_summary += summarize_slide(text, previous_summary=context)
+        
+                # Format batch text with clear headers per slide
+                batch_text = "\n\n".join(
+                    [f"Slide {i + j + 1}:\n{text}" for j, text in enumerate(batch)]
+                )
+                batch_summary = summarize_slide(batch_text, previous_summary=context)
                 summaries.append(batch_summary)
-                context = batch_summary  # Update context for next batch
-
-            # Combine all the slide summaries
+                context = batch_summary
+        
+            # Combine all summaries into one final string
             combined_summary = "\n".join(summaries)
-            
+        
+            # Score the full deck based on all summarized slides
             score_data = score_deck(combined_summary)
             
             vc_stage = score_data["info"]["VC Stage"]
