@@ -68,34 +68,34 @@ if st.session_state["authenticated"]:
             return file.read()
     
     def summarize_slide(text, previous_summary="", retries=5):
-    prompt = load_prompt_from_file("summary_prompt.txt")
+        prompt = load_prompt_from_file("summary_prompt.txt")
+        
+        messages = [
+            {"role": "system", "content": "You are a VC analyst. Analyze the pitch slide."},
+            {"role": "user", "content": prompt}
+        ]
     
-    messages = [
-        {"role": "system", "content": "You are a VC analyst. Analyze the pitch slide."},
-        {"role": "user", "content": prompt}
-    ]
+        if previous_summary:
+            messages.append({"role": "assistant", "content": previous_summary})
+    
+        messages.append({"role": "user", "content": text})
 
-    if previous_summary:
-        messages.append({"role": "assistant", "content": previous_summary})
-
-    messages.append({"role": "user", "content": text})
-
-    for attempt in range(retries):
-        try:
-            response = client.chat.completions.create(
-                model="gpt-4o",
-                messages=messages,
-                temperature=0.3
-            )
-            return response.choices[0].message.content
-        except (RateLimitError, APIError) as e:
-            if attempt < retries - 1:
-                wait_time = 5 * (attempt + 1)
-                st.warning(f"⚠️ Rate limit hit or temporary error. Retrying in {wait_time}s...")
-                time.sleep(wait_time)
-            else:
-                st.error("❌ OpenAI API rate limit exceeded after retries.")
-                raise e
+        for attempt in range(retries):
+            try:
+                response = client.chat.completions.create(
+                    model="gpt-4o",
+                    messages=messages,
+                    temperature=0.3
+                )
+                return response.choices[0].message.content
+            except (RateLimitError, APIError) as e:
+                if attempt < retries - 1:
+                    wait_time = 5 * (attempt + 1)
+                    st.warning(f"⚠️ Rate limit hit or temporary error. Retrying in {wait_time}s...")
+                    time.sleep(wait_time)
+                else:
+                    st.error("❌ OpenAI API rate limit exceeded after retries.")
+                    raise e
 
     def score_deck(summary, retries=5):
         rubric_prompt = load_prompt_from_file("score_prompt.txt")
@@ -207,7 +207,6 @@ if st.session_state["authenticated"]:
         context = ""
         batch_size = 10  # Process 10 slides at a time (adjust based on token limit)
 
-        st.write("updated now")
         with st.spinner("Evaluating the deck..."):
             summaries = []
             for i in range(0, len(slides), batch_size):
