@@ -60,13 +60,6 @@ if st.session_state["authenticated"]:
         with open(log_file, "w") as f:
             json.dump(usage, f)
 
-    def get_image_base64(page):
-        pix = page.get_pixmap(dpi=120)
-        img = Image.frombytes("RGB", [pix.width, pix.height], pix.samples)
-        buffer = BytesIO()
-        img.save(buffer, format="PNG")
-        return base64.b64encode(buffer.getvalue()).decode("utf-8")
-
     def load_prompt_from_file(filename):
         """
         Load the prompt content from a text file and return it as a string.
@@ -74,42 +67,35 @@ if st.session_state["authenticated"]:
         with open(filename, "r") as file:
             return file.read()
     
-    def summarize_slide(text, image_b64, previous_summary="", retries=5):
-        prompt = load_prompt_from_file("summary_prompt.txt")
-        
-        messages = [
-            {"role": "system", "content": "You are a VC analyst. Analyze the pitch slide (text and image)."},
-            {"role": "user", "content": prompt}
-        ]
+    def summarize_slide(text, previous_summary="", retries=5):
+    prompt = load_prompt_from_file("summary_prompt.txt")
+    
+    messages = [
+        {"role": "system", "content": "You are a VC analyst. Analyze the pitch slide."},
+        {"role": "user", "content": prompt}
+    ]
 
-        if previous_summary:
-            messages.append({"role": "assistant", "content": previous_summary})
+    if previous_summary:
+        messages.append({"role": "assistant", "content": previous_summary})
 
-        # Add text and image for current slide
-        messages.append({
-            "role": "user",
-            "content": [
-                {"type": "text", "text": text},
-                {"type": "image_url", "image_url": {"url": f"data:image/png;base64,{image_b64}"}}
-            ]
-        })
+    messages.append({"role": "user", "content": text})
 
-        for attempt in range(retries):
-            try:
-                response = client.chat.completions.create(
-                    model="gpt-4o",
-                    messages=messages,
-                    temperature=0.3
-                )
-                return response.choices[0].message.content
-            except (RateLimitError, APIError) as e:
-                if attempt < retries - 1:
-                    wait_time = 5 * (attempt + 1)
-                    st.warning(f"⚠️ Rate limit hit or temporary error. Retrying in {wait_time}s...")
-                    time.sleep(wait_time)
-                else:
-                    st.error("❌ OpenAI API rate limit exceeded after retries.")
-                    raise e
+    for attempt in range(retries):
+        try:
+            response = client.chat.completions.create(
+                model="gpt-4o",
+                messages=messages,
+                temperature=0.3
+            )
+            return response.choices[0].message.content
+        except (RateLimitError, APIError) as e:
+            if attempt < retries - 1:
+                wait_time = 5 * (attempt + 1)
+                st.warning(f"⚠️ Rate limit hit or temporary error. Retrying in {wait_time}s...")
+                time.sleep(wait_time)
+            else:
+                st.error("❌ OpenAI API rate limit exceeded after retries.")
+                raise e
 
     def score_deck(summary, retries=5):
         rubric_prompt = load_prompt_from_file("score_prompt.txt")
@@ -215,8 +201,7 @@ if st.session_state["authenticated"]:
         slides = []
         for page in doc:
             slide_text = page.get_text()
-            slide_img_b64 = get_image_base64(page)
-            slides.append((slide_text, slide_img_b64))
+            slides.append(slide_text)
 
         # Process slides in batches to ensure context is kept without hitting token limits
         context = ""
@@ -227,8 +212,8 @@ if st.session_state["authenticated"]:
             for i in range(0, len(slides), batch_size):
                 batch = slides[i:i + batch_size]
                 batch_summary = ""
-                for text, img_b64 in batch:
-                    batch_summary += summarize_slide(text, img_b64, previous_summary=context)
+                for text in batch:
+                    batch_summary += summarize_slide(text, previous_summary=context)
                 summaries.append(batch_summary)
                 context = batch_summary  # Update context for next batch
 
