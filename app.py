@@ -207,6 +207,7 @@ if st.session_state["authenticated"]:
         context = ""
         batch_size = 10  # Process 10 slides at a time (adjust based on token limit)
 
+        st.write("updated now")
         with st.spinner("Evaluating the deck..."):
             summaries = []
             for i in range(0, len(slides), batch_size):
